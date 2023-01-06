@@ -92,15 +92,14 @@ if exist %KODI_ROOT% (
 )
 
 if exist %KODI_ROOT% (
-    echo %errorlevel%
 
 	if "%errorlevel%" == "1" (
-		rmdir/q /s %KODI_ROOT%
+		rd /q /s %KODI_ROOT%
 	)
 
 	if "%errorlevel%" == "2" (
     		start /wait %KODI_ROOT%\start-kodi.bat
-            timeout /t 3 /nobreak > NUL
+            timeout /t 1 /nobreak > NUL
             goto top
 	)
 
@@ -128,16 +127,16 @@ choice /C ml /M "(M)atrix, (L)eia :"
 :: # x86, x64 Win32, Win64
 :: ########################
 if "%errorlevel%" == "1" (
-    set $sh_url=http://mirrors.kodi.tv/releases/windows/win%OS%/kodi-19.5-Matrix-x%OS%.exe
     set $KBuild=Matrix
-    set $KVer=19.5
+    set $KVer=%$Matrix%
     set Redistributable=vc2019
 ) else (
-    set $sh_url=http://mirrors.kodi.tv/releases/windows/win%OS%/kodi-18.8-Leia-x%OS%.exe
     set $KBuild=Leia
-    set $KVer=18.5
+    set $KVer=%$Leia%
     set Redistributable=vc2017
 )
+
+set $sh_url=http://mirrors.kodi.tv/releases/windows/win%OS%/kodi-%$KVer%-%$KBuild%-x%OS%.exe
 
 :: # clear the choice returned
 :: # make errorlevel 0
@@ -170,8 +169,8 @@ if %errorlevel% NEQ 0 (
     timeout /t 5
 
     rem # remove unwanted directories and files
-    rmdir/q /s %KODI_ROOT%\$TEMP
-    rmdir/q /s %KODI_ROOT%\$PLUGINSDIR
+    rd /q /s %KODI_ROOT%\$TEMP
+    rd /q /s %KODI_ROOT%\$PLUGINSDIR
     del /q %KODI_ROOT%\Uninstall.exe
     echo.
 )
@@ -211,16 +210,16 @@ echo Creating [%start_kodi%]...
   echo goto start_kodi
   echo.
   echo :eof
-  echo exity
+  echo exit
 ) >"%start_kodi%" || goto :fail
 
 echo.
 echo Kodi Portable Installation Complete..
 echo.
 echo ** Move the 'kodi-portable' directory to your location of choice **
-echo ** and run 'start-kodi.bat' to setup.                            **
+echo ** and run 'start-kodi.bat' to setup shortcut.                   **
 echo.
-timeout /t 3 /nobreak > NUL
+timeout /t 2 /nobreak > NUL
 call :save_config
 goto :top
 
@@ -229,7 +228,7 @@ goto :top
 :save_portabledata
 cd %KODI_ROOT%
 if exist %PPATH%portable_data_%$KBuild%-test.tar (
-    echo File already exists, do you want to overwrite?
+    echo File: [portable_data_%$KBuild%-test.tar] already exists, do you want to overwrite?
     echo.
     choice /C yn /M "(Y)es (N)o :"
 )
@@ -238,7 +237,7 @@ if "%errorlevel%" == "1" (
 	echo Saving: [portable_data]
 	%PPATH%bin\7z.exe a %PPATH%portable_data_%$KBuild%-test.tar portable_data
 )
-timeout /t 3 /nobreak > NUL
+timeout /t 2 /nobreak > NUL
 EXIT /B 0
 
 :: # Load Configuration
@@ -249,7 +248,7 @@ for /f "tokens=1,2 delims== eol=#" %%a in (%PPATH%%~n0.conf) do (
     echo %%a: %%b	
     set %%a=%%b
 )
-timeout /t 3 /nobreak > NUL
+timeout /t 2 /nobreak > NUL
 EXIT /B 0
 
 :: # Load config defaults
@@ -260,10 +259,10 @@ set $KInstallDir=kodi-portable
 set $KBuild%=
 set $KVer%=
 set $KArchitecture=
-set $Nexus=20.0-Nexus_rc2
-set $Matrix=19.5-Matrix
-set $Leia=18.9-Leia
-set $Krypton=17.6-Krypton
+set $Nexus=20.0
+set $Matrix=19.5
+set $Leia=18.9
+set $Krypton=17.6
 
 :: # Save configuration
 :: ###################################
