@@ -1,21 +1,22 @@
 @echo off
 
-rem # Kodi Portable Installer v1
-rem #############################
+:: # Kodi Portable Installer v1
+:: #
+:: ###################################################################################
 
-rem # directory to install kodi portable
-rem #####################################
-rem set KodiDir=kodi-portable
+:: # directory to install kodi portable
+:: #####################################
+:: set KodiDir=kodi-portable
 
-rem #if executed with "--debug" print all executed commands
-rem ########################################################
+:: #if executed with "--debug" print all executed commands
+:: ########################################################
 for %%a in (%*) do (
     if [%%~a]==[--debug] echo on
 )
 
-rem mode con:cols=55 lines=2
-rem BatchGotAdmin
-rem -------------------------------------
+:: mode con:cols=55 lines=2
+:: BatchGotAdmin
+:: -------------------------------------
 REM --> Check for permissions
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
 
@@ -39,9 +40,9 @@ cls
 
 Title Kodi Portable
 
-rem ## get architecture
-rem #########################
-rem reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32 || set OS=64
+:: ## get architecture
+:: #########################
+reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32 || set OS=64
 
 set PPATH=%~dp0
 
@@ -50,8 +51,8 @@ if not exist %PPATH%%~n0.conf (
     call :config_defaults
 )
 
-rem # load config
-rem #################################
+:: # load config
+:: #################################
 echo Loading configuration: [%~n0.conf]
 echo. 
 call :load_config
@@ -59,15 +60,15 @@ ver > nul
 
 set KODI_ROOT=%PPATH%%$KInstallDir%
 
-rem set KODI_ROOT=%PPATH%%KodiDir%
-rem set PATH=%PATH%;"%~dp0bin"
+:: set KODI_ROOT=%PPATH%%KodiDir%
+:: set PATH=%PATH%;"%~dp0bin"
 
 :top
 cls
 
-rem # check if built before
-rem # if built before show menu
-rem #################################
+:: # check if built before
+:: # if built before show menu
+:: #################################
 
 color 1F
 
@@ -124,8 +125,8 @@ echo.
 echo. 
 choice /C ml /M "(M)atrix, (L)eia :"
 
-rem # x86, x64 Win32, Win64
-rem ########################
+:: # x86, x64 Win32, Win64
+:: ########################
 if "%errorlevel%" == "1" (
     set $sh_url=http://mirrors.kodi.tv/releases/windows/win%OS%/kodi-19.5-Matrix-x%OS%.exe
     set $KBuild=Matrix
@@ -138,9 +139,9 @@ if "%errorlevel%" == "1" (
     set Redistributable=vc2017
 )
 
-rem # clear the choice returned
-rem # make errorlevel 0
-rem ##############################
+:: # clear the choice returned
+:: # make errorlevel 0
+:: ##############################
 ver > nul
 
 if not exist %PPATH%kodi-%$KBuild%-x%OS%.nsis (
@@ -175,8 +176,8 @@ if %errorlevel% NEQ 0 (
     echo.
 )
 
-rem # Create start-kodi.bat
-rem ##################################
+:: # Create start-kodi.bat
+:: ##################################
 set "start_kodi=%KODI_ROOT%\start-kodi.bat"
 echo Creating [%start_kodi%]...
 (
@@ -222,10 +223,9 @@ echo.
 timeout /t 3 /nobreak > NUL
 call :save_config
 goto :top
-rem goto :eof
 
-rem # Save portable data
-rem ###################################
+:: # Save portable data
+:: ###################################
 :save_portabledata
 cd %KODI_ROOT%
 if exist %PPATH%portable_data_%$KBuild%-test.tar (
@@ -241,8 +241,8 @@ if "%errorlevel%" == "1" (
 timeout /t 3 /nobreak > NUL
 EXIT /B 0
 
-rem # Load Configuration
-rem ###################################
+:: # Load Configuration
+:: ###################################
 :load_config
 for /f "tokens=1,2 delims== eol=#" %%a in (%PPATH%%~n0.conf) do (
     rem # set env for each line, set <name>=<value>
@@ -252,8 +252,8 @@ for /f "tokens=1,2 delims== eol=#" %%a in (%PPATH%%~n0.conf) do (
 timeout /t 3 /nobreak > NUL
 EXIT /B 0
 
-rem # Load config defaults
-rem ###################################
+:: # Load config defaults
+:: ###################################
 :config_defaults
 echo Creating [%~n0.conf] defaults...
 set $KInstallDir=kodi-portable
@@ -265,8 +265,8 @@ set $Matrix=19.5-Matrix
 set $Leia=18.9-Leia
 set $Krypton=17.6-Krypton
 
-rem # Save configuration
-rem ###################################
+:: # Save configuration
+:: ###################################
 :save_config
 if exist %PPATH%%~n0.conf (del %PPATH%%~n0.conf)
 set "kodi_config=%PPATH%%~n0.conf"
@@ -289,14 +289,14 @@ echo Updating: [%~n0.conf]...
 timeout /t 2 /nobreak > NUL
 EXIT /B 0
 
-rem # Error Handling
-rem ###################################
+:: # Error Handling
+:: ###################################
 :fail
   set exit_code=%ERRORLEVEL%
 
-  rem if exist "%DOWNLOADER%" (
-  rem   del "%DOWNLOADER%"
-  rem )
+  :: if exist "%DOWNLOADER%" (
+  ::   del "%DOWNLOADER%"
+  :: )
 
   echo.
   echo ###########################################################
