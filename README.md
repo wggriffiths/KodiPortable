@@ -1,2 +1,2 @@
-# kodi-portable
-Helps you build a portable version of Kodi 
+# KodiPortable Installer
+Helps you build a portable version of Kodi.
