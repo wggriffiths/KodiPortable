@@ -17,6 +17,11 @@ for %%a in (%*) do (
     if [%%~a]==[--debug] (echo on)
 )
 
+IF "%~1"=="/?" (
+    goto :KUSAGE
+    EXIT /B
+)
+
 :: if [%1]==[] goto :KUSAGE
 
 :: # Get Admin
@@ -40,33 +45,40 @@ echo UAC.ShellExecute "%~s0","%ARGS%", "", "runas", 1 >> "%temp%\getadmin.vbs"
 exit /B
 
 :gotAdmin
-setlocal  & cd /d %~dp0
+setlocal enabledelayedexpansion & cd /d %~dp0
 if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
 :: -------------------------------------------------------------------->
 
 :: #####################################################################
-:: # Start of main script - load config and env, stay in loop until
+:: # Start of main script - load config, env, stay in loop until
 :: # ExitMenu=1
 :: #####################################################################
 Title Kodi Portable
 cls
 :start
-color 0F
 call :load_config
 
-if [%$KArchitecture%]==[unset] (
-    call :set_env
-)
+rem %$KBuild%-x%CPU%
+rem echo %$KBuild%-x%CPU%
+rem set $fSearch=*.nsis
+rem set $sTitle=Kodi Installations: 
+rem call :getfilelist
+rem echo %file%
+rem pause
 
-call :save_config
-ver > nul
+rem if [%$KArchitecture%]==[unset] (
+rem     call :set_env
+rem     call :save_config
+rem )
+rem ver > nul
 
 if "%$KInstall%"=="0" (
 	call :kbuild
 ) else (
 	call :kinstall_menu
-	call :save_config
 )
+
+call :save_config
 
 if "%ExitMenu%"=="1" (goto :eof)
 goto :start
@@ -78,17 +90,15 @@ goto :start
 color 1F
 :topmenu
 cls
-	echo *---------------------------------------------------------*
-	echo * Warning: Kodi has been built before
-	echo *---------------------------------------------------------*
+	echo *-------------------------------------------------------------*
 	echo * Install Dir: [..\%$KInstallDir%] Build: [%$KBuild%] 
 	echo * Ver: [%$KVer%] Architecture: [x%CPU%]
-	echo *---------------------------------------------------------*
+	echo *-------------------------------------------------------------*
 	echo. 
 	echo   1^) Rebuild ^(this will delete the current build^)
 	echo   2^) Open Kodi
 	echo   3^) Save 'Portable_data'
-	echo   4^) Create Portable App ^(PortableApps.com^)
+    echo   4^) Create Portable App ^(PortableApps.com^)
 	echo   5^) Exit 
 	echo. 
 	echo. 
@@ -100,29 +110,29 @@ cls
 		set $KArchitecture=unset
 		set CPU=unset
 		set $KInstall=0
-		call :save_config
-		call :set_env
+		rem call :save_config
+		rem call :set_env
 		ver > nul
-	EXIT /B 0
+        EXIT /B 0
 	)
 
 	if "%errorlevel%" == "2" (
-	start /wait %KODI_ROOT%\start-kodi.bat
-	timeout /t 1 /nobreak > NUL
+        start /wait %KODI_ROOT%\start-kodi.bat
+        timeout /t 1 /nobreak > NUL
 	)
 
 	if "%errorlevel%" == "3" (
-	call :save_portabledata
-	ver > nul
+        call :save_portabledata
+        ver > nul
 	)
 
 	if "%errorlevel%" == "4" (
-	call :create_papp
+        call :create_papp
 	)
 
 	if "%errorlevel%" == "5" (
-	set ExitMenu=1
-	goto :exitmenu
+        set ExitMenu=1
+        goto :exitmenu
 	)
 
 if "%$KInstall%"=="1" (goto :topmenu)
@@ -133,58 +143,94 @@ EXIT /B 0
 :: # Kodi Build Function - build base image
 :: #####################################################################
 :kbuild
+color 1F
 cls
-echo *---------------------------------------------------------*
+
+echo *-------------------------------------------------------------*
 echo * Kodi Portable Installer v1
-echo *---------------------------------------------------------*
+echo *-------------------------------------------------------------*
 echo. 
-echo Select the release to install.
+echo   1. Nexus 
+echo   2. Matrix
+echo   3. Leia
 echo. 
 echo. 
-choice /C ml /M "(M)atrix, (L)eia: "
+choice /C 123 /N /M "Select the release to install: "
 
 :: # x86, x64 Win32, Win64
 :: #########################
 if "%errorlevel%" == "1" (
-    set $KBuild=Matrix
-    set $KVer=%$Matrix%
+    echo This does not work atm.
+    pause
+    goto :kbuild
+    set $KBuild=Nexus
+    rem set $KVer=%$Nexus%
     set Redistributable=vc2019
-) else (
-    set $KBuild=Leia
-    set $KVer=%$Leia%
-    set Redistributable=vc2017
+    set fList=%$_Nexus%%$_Nexus%
+    set fBuild=Nexus
+    set sTilte=Kodi Nexus
 )
 
-set $sh_url=http://mirrors.kodi.tv/releases/windows/win%$KArchitecture%/kodi-%$KVer%-%$KBuild%-x%CPU%.exe
+if "%errorlevel%" == "2" (
+    set $KBuild=Matrix
+    rem set $KVer=%$Matrix%
+    set Redistributable=vc2019
+    set fList=%$_Matrix%
+    set fBuild=Matrix
+    set sTilte=Kodi Matrix   
+)
 
+if "%errorlevel%" == "3" (
+    set $KBuild=Leia
+    rem set $KVer=%$Leia%
+    set Redistributable=vc2017
+    set fList=%$_Leia%
+    set fBuild=Leia
+    set sTilte=Kodi Leia
+)
+
+call :setversion
+call :set_env
+
+set $KVer=%$file%
+set $pfile=portable_data_%$KVer%-%$KBuild%-x%CPU%.tar
+set $file=kodi-%$KVer%-%$KBuild%-x%CPU%
+
+set $sh_url=%$_DownloadBaseUrl%win%$KArchitecture%/%$file%.exe
+::set $sh_url=http://mirrors.kodi.tv/releases/windows/win%$KArchitecture%/kodi-%$KVer%-%$KBuild%-x%CPU%.exe
+
+ver > nul
 :: # clear the choice returned
 :: # make errorlevel 0
 :: #############################
-ver > nul
 
-if not exist %PPATH%kodi-%$KBuild%-%$KVer%-x%CPU%.nsis (
-    echo Downloading Kodi %$KBuild% v19.5
-    echo %PPATH%bin\wget -q %$sh_url% --show-progress -O %PPATH%kodi-%$KBuild%-%$KVer%-x%CPU%.nsis
-    %PPATH%bin\wget -q %$sh_url% --show-progress -O %PPATH%kodi-%$KBuild%-%$KVer%-x%CPU%.nsis
+if not exist %PPATH%%$file%.nsis (
+    echo Downloading %$file%.nsis
+    echo %PPATH%bin\wget -q %$sh_url% --show-progress -O %PPATH%%$file%.nsis
+    %PPATH%bin\wget -q %$sh_url% --show-progress -O %PPATH%%$file%.nsis
 )
 
 if %errorlevel% NEQ 0 (
     echo Error downloading file, Error: %errorlevel%
+    del %PPATH%%$file%.nsis
     goto :fail
 ) else (
-    echo Extracting: [%PPATH%kodi-%$KBuild%-%$KVer%-x%CPU%.nsis]
-    %PPATH%bin\7z.exe x -o"%KODI_ROOT%" %PPATH%kodi-%$KBuild%-%$KVer%-x%CPU%.nsis
+    echo Extracting: [%PPATH%%$file%.nsis]
+    %PPATH%bin\7z.exe x -o"%KODI_ROOT%" %PPATH%%$file%.nsis
     rem If it exists extract portable_data
-    if exist %PPATH%portable_data (
-    	echo Extracting: Portable Data [%PPATH%portable_data.tar]
-    	%PPATH%bin\7z.exe x -o"%KODI_ROOT%" "%PPATH%portable_data_%$KBuild%.tar"
+    if exist %PPATH%%$pfile% (
+    rem if exist %PPATH%portable_data_%$KVer%-%$KBuild%-x%CPU%.tar (
+    	echo Extracting: Portable Data [%PPATH%%$pfile%]
+    	%PPATH%bin\7z.exe x -o"%KODI_ROOT%" "%PPATH%%$pfile%"
     )
     
     rem # install Visual C++ 2017(x%CPU%) Redistributable
     rem ###################################################
     echo Installing: Visual C++ 2017^(x%CPU%^) Redistributable
-    start /wait %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe /s
-    timeout /t 4
+    if exist %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe (
+        start /wait %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe /s
+        timeout /t 4
+    )
 
     rem # remove unwanted directories and files
     rd /q /s %KODI_ROOT%\$TEMP
@@ -232,15 +278,15 @@ echo Creating [%start_kodi%]...
   echo exit
 ) >"%start_kodi%" || goto :fail
 
-echo *---------------------------------------------------------*
-echo * Kodi Portable Installation Complete..                   *
-echo *---------------------------------------------------------*
-echo * Move the 'kodi-portable' directory to your location of  *
-echo * choice and run 'start-kodi.bat' to setup shortcut.      *
-echo * -- Alternatively use the (PortableApps.com) option --   *
-echo *---------------------------------------------------------*
+echo *-------------------------------------------------------------*
+echo * Kodi Portable Installation Complete..                       *
+echo *-------------------------------------------------------------*
+echo ** Move the 'kodi-portable' directory to your location of    **
+echo ** choice and run 'start-kodi.bat' to setup shortcut.        **
+echo ** -- Alternatively use the (PortableApps.com) option --     **
+echo ***************************************************************
 echo.
-timeout /t 8 /nobreak
+timeout /t 8
 call :save_config
 EXIT /B 0
 
@@ -264,9 +310,9 @@ if "%PROCESSOR_ARCHITECTURE%" == "x86" (
     set CPU=64
 )
 
-echo *---------------------------------------------------------*
+echo *-------------------------------------------------------------*
 echo * Architecture not set
-echo *---------------------------------------------------------*
+echo *-------------------------------------------------------------*
 echo.
 echo   1^) Set Automatically ^(x%CPU%^)
 echo   2^) Manual Selection
@@ -275,9 +321,9 @@ choice /C 12 /N /M "Choose an option: "
 echo.
 
 if "%errorlevel%" == "2" (
-	echo *---------------------------------------------------------*
+echo *-------------------------------------------------------------*
 	echo * Select Architecture
-	echo *---------------------------------------------------------*
+	echo *-------------------------------------------------------------*
 	echo.
 	echo   1^) x86 ^(32^)
 	echo   2^) x64 ^(64^)
@@ -311,17 +357,20 @@ EXIT /B 0
 :save_portabledata
 
 :: check if 'portable_data' folder exists
-if exist %PPATH%portable_data_% (
-	if exist %PPATH%portable_data_%$KBuild%-test.tar (
-    	echo File: [portable_data_%$KBuild%-test.tar] already exists, do you want to overwrite?
+if exist %PPATH%%$KInstallDir%\portable_data (
+	if exist %PPATH%portable_data_%$KVer%-%$KBuild%-x%CPU%.tar (
+    	echo File: [portable_data_%$KVer%-%$KBuild%-x%CPU%.tar] already exists, do you want to overwrite?
     	echo.
     	choice /C yn /M "^(Y^)es ^(N^)o :"
 	)
 
-	if "%errorlevel%" == "1" (
-		echo Saving: [portable_data]
+    if "%errorlevel%" == "2" (
+        EXIT /B 0
+    ) else (
+		echo Saving:[portable_data]
 		cd %KODI_ROOT%
-		%PPATH%bin\7z.exe a %PPATH%portable_data_%$KBuild%-test.tar portable_data
+        pause
+		%PPATH%bin\7z.exe a %PPATH%portable_data_%$KVer%-%$KBuild%-x%CPU%.tar portable_data
 		cd %PPATH%
 	)
 ) else (echo Nothing to save. Open Kodi first.)
@@ -332,10 +381,13 @@ EXIT /B 0
 :: # Load Configuration Function
 :: ###############################
 :load_config
+cls
+color 0F
+
 set PPATH=%~dp0
-echo Loading: [%~n0.conf]
+echo Loading config: [%~n0.conf]
 if not exist %PPATH%%~n0.conf (
-    echo Config not found..
+    echo Config not found.
     call :config_defaults
 )
 
@@ -349,13 +401,13 @@ if %$KArchitecture%==64 (set CPU=64)
 if %$KArchitecture%==32 (set CPU=86)
 
 set KODI_ROOT=%PPATH%%$KInstallDir%
-timeout /t 2 /nobreak > NUL
+timeout /t 1 /nobreak > NUL
 EXIT /B 0
 
 :: # Load config defaults
 :: ########################
 :config_defaults
-echo Creating [%~n0.conf] defaults...
+echo Creating config defaults: [%~n0.conf] 
 set $KInstallDir=kodi.app
 set $KBuild%=
 set $KInstall=0
@@ -365,13 +417,17 @@ set $Nexus=20.0
 set $Matrix=19.5
 set $Leia=18.9
 set $Krypton=17.6
+set $_DownloadBaseUrl=http://mirrors.kodi.tv/releases/windows/
+set $_Nexus=20.0-rc2 20-rc1 20-beta1 
+set $_Matrix=19.5 19.4 19.3 19.2 19.0 
+set $_Leia=18.9 18.8 18.7 
 
 :: # Save configuration
 :: ######################
 :save_config
 if exist %PPATH%%~n0.conf (del %PPATH%%~n0.conf)
 set "kodi_config=%PPATH%%~n0.conf"
-echo Saving: [%~n0.conf]
+echo Saving config: [%~n0.conf]
 (
   echo # config file for install-kodi.bat
   echo ###################################
@@ -387,9 +443,96 @@ echo Saving: [%~n0.conf]
   echo $Matrix=%$Matrix%
   echo $Leia=%$Leia%
   echo $Krypton=%$Krypton%
+  echo.
+  echo # Installer versions alt idea
+  echo ###################################
+  echo $_DownloadBaseUrl=%$_DownloadBaseUrl%
+  echo $_Nexus=%$_Nexus%
+  echo $_Matrix=%$_Matrix%
+  echo $_Leia=%$_Leia%
+
 ) >"%kodi_config%" || goto :fail
-rem timeout /t 1 /nobreak > NUL
+ver > nul
 EXIT /B 0
+
+:: # Get file list function.
+:: #
+:: # Argumnets: $fSearch=pattern e.g set $fSearch=*.doc
+:: #            $sTitle=Title to display
+:: # Retun:     $file
+:: #
+:: #######################################################
+:getfilelist
+::setlocal enabledelayedexpansion
+set n=1
+set $file=
+set cList=
+set arr[1]=
+
+echo " *--------------------------------------------------------------------*"
+echo " * %$sTitle%
+echo " *--------------------------------------------------------------------*"
+echo.
+
+for /f tokens^=* %%i in ('where .:%$fSearch%') do (
+	rem @echo/ !n!: Path: %%~dpi ^| Name: %%~nxi
+	@echo/ !n!: %%i
+	call set "cList=%%cList%%!n!"
+	set arr[!n!]=%%i
+	set /a n=n+1
+)
+
+rem # check if anything found
+rem ###########################
+if not defined arr[1] (
+	set $file=0
+	exit /b 0
+)
+
+:: # return the selected file
+:: ############################
+echo.
+choice /c %cList% /n /m "Make a selection: "
+set $file=!arr[%errorlevel%]!
+::setlocal
+exit /b 0
+
+:: # Get versions function.
+:: #
+:: # Argumnets: $fList=ver pattern list
+:: #            $sTitle=Title to display
+:: # Retun:     $file
+:: #
+:: ###########################################################
+:setversion
+set n=1
+set cList=
+set arr[1]=
+set $file=
+
+echo " *--------------------------------------------------------------------*"
+echo " * %sTilte%
+echo " *--------------------------------------------------------------------*"
+echo.
+
+for %%a in (%fList%) do (
+    echo !n!: Kodi-%%a-!fBuild!
+	call set "cList=%%cList%%!n!"
+	set arr[!n!]=%%a
+	set /a n=n+1
+)
+
+rem # check if anything found
+rem ###########################
+if not defined arr[1] (
+	set $file=0
+	exit /b 0
+)
+
+echo.
+choice /c %cList% /n /m "Make a selection: "
+set $file=!arr[%errorlevel%]!
+exit /b 0
 
 :: # Error Handling
 :: ##################
@@ -404,9 +547,9 @@ EXIT /B 0
   exit /B %exit_code%
 
 :KUSAGE
-echo KPortable v0.2 help
+echo KPortable v0.x help
 for %%f in ("%0") do set cmdline=%%~nf
-echo Usage: %cmdline% ^<SUBJECT^> ^<BODY^> ^<ATTACHMENT^>
+echo Usage: %cmdline% ^<A^> ^<B^> ^<C^>
 exit /B 1
 
 :eof
