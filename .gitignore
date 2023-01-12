@@ -1,0 +1,6 @@
+# Ignore files e.g *.txt
+notes/
+*.conf
+*.pdf
+*.nsis
+*.tar
