@@ -1,5 +1,6 @@
 # Ignore files e.g *.txt
 notes/
+kodi.app/
 *.conf
 *.pdf
 *.nsis
