@@ -54,8 +54,8 @@ if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
 :: # ExitMenu=1
 :: #####################################################################
 Title Kodi Portable
-cls
 :start
+cls
 call :load_config
 
 rem %$KCodename%-x%CPU%
@@ -65,12 +65,6 @@ rem set $sTitle=Kodi Installations:
 rem call :getfilelist
 rem echo %file%
 rem pause
-
-rem if [%$KArchitecture%]==[unset] (
-rem     call :set_env
-rem     call :save_config
-rem )
-rem ver > nul
 
 if "%$KInstall%"=="0" (
 	call :kbuild
@@ -99,10 +93,10 @@ cls
 	echo   2^) Open Kodi
 	echo   3^) Save 'Portable_data'
     echo   4^) Create Portable App ^(PortableApps.com^)
-	echo   5^) Exit 
+	echo   x^) Exit 
 	echo. 
 	echo. 
-	choice /C 12345 /N /M "Choose an option: "
+	choice /C 1234x /N /M "Choose an option: "
 	echo.
 
 	if "%errorlevel%" == "1" (
@@ -110,8 +104,6 @@ cls
 		set $KArchitecture=unset
 		set CPU=unset
 		set $KInstall=0
-		rem call :save_config
-		rem call :set_env
 		ver > nul
         EXIT /B 0
 	)
@@ -164,7 +156,6 @@ if "%errorlevel%" == "1" (
     pause
     goto :kbuild
     set $KCodename=Nexus
-    rem set $KVer=%$Nexus%
     set Redistributable=vc2019
     set fList=%$_Nexus%%$_Nexus%
     set kCodename=%$KCodename%
@@ -172,7 +163,6 @@ if "%errorlevel%" == "1" (
 
 if "%errorlevel%" == "2" (
     set $KCodename=Matrix
-    rem set $KVer=%$Matrix%
     set Redistributable=vc2019
     set fList=%$_Matrix%
     set kCodename=%$KCodename%
@@ -180,10 +170,9 @@ if "%errorlevel%" == "2" (
 
 if "%errorlevel%" == "3" (
     set $KCodename=Leia
-    rem set $KVer=%$Leia%
     set Redistributable=vc2017
     set fList=%$_Leia%
-    set kCodename=%$KCodename%
+    set KCodename=%$KCodename%
 )
 
 call :setversion
