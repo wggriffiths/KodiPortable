@@ -158,21 +158,18 @@ if "%errorlevel%" == "1" (
     set $KCodename=Nexus
     set Redistributable=vc2019
     set fList=%$_Nexus%%$_Nexus%
-    set kCodename=%$KCodename%
 )
 
 if "%errorlevel%" == "2" (
     set $KCodename=Matrix
     set Redistributable=vc2019
     set fList=%$_Matrix%
-    set kCodename=%$KCodename%
 )
 
 if "%errorlevel%" == "3" (
     set $KCodename=Leia
     set Redistributable=vc2017
     set fList=%$_Leia%
-    set KCodename=%$KCodename%
 )
 
 call :setversion
@@ -298,7 +295,7 @@ if "%PROCESSOR_ARCHITECTURE%" == "x86" (
 )
 
 echo *-------------------------------------------------------------*
-echo * Kodi %kCodename% Architecture
+echo * Kodi %$kCodename% Architecture
 echo *-------------------------------------------------------------*
 echo.
 echo   1^) Set Automatically ^(x%CPU%^)
@@ -453,7 +450,6 @@ EXIT /B 0
 :: #
 :: #######################################################
 :getfilelist
-::setlocal enabledelayedexpansion
 set n=1
 set $file=
 set cList=
@@ -485,7 +481,6 @@ echo.
 echo.
 choice /c %cList% /n /m "Make a selection: "
 set $file=!arr[%errorlevel%]!
-::setlocal
 exit /b 0
 
 :: # Get versions function.
@@ -503,12 +498,12 @@ set arr[1]=
 set $file=
 
 echo *--------------------------------------------------------------------*
-echo * Kodi %kCodename% Version
+echo * Kodi %$kCodename% Version
 echo *--------------------------------------------------------------------*
 echo.
 
 for %%a in (%fList%) do (
-    echo   !n!: Kodi-%%a-!kCodename!
+    echo   !n!: Kodi-%%a-!$kCodename!
 	call set "cList=%%cList%%!n!"
 	set arr[!n!]=%%a
 	set /a n=n+1
