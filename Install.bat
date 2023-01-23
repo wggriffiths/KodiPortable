@@ -55,7 +55,7 @@ if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
 :: # Start of main script - load config, env, stay in loop until
 :: # ExitMenu=1
 :: #####################################################################
-Title Kodi Portable
+Title Kodi Portable - v%kpi_ver%
 :start
 cls
 call :load_config
@@ -80,7 +80,7 @@ if "%ExitMenu%"=="1" (goto :eof)
 goto :start
 :: ---------------------------------------------------------------------
 
-:: # 
+:: # Kodi Portable Main Menu
 :: #####################################################################
 :kinstall_menu
 color 1F
@@ -520,8 +520,12 @@ exit /b 0
 
 :KUSAGE
 echo Kodi Portable v%kpi_ver% help
+echo.
 for %%f in ("%0") do set cmdline=%%~nf
-echo Usage: %cmdline% ^<A^> ^<B^> ^<C^>
+echo Usage: %cmdline% ^<Codename^> ^<Version^> ^<Architecture^>
+echo.
+echo Example:
+echo    install Nexus 20.0 64
+echo    install Nexus 20.0 86
 exit /B 1
-
 :eof
