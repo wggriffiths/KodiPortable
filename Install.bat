@@ -1,8 +1,10 @@
 @echo off
 
+set kpi_ver=0.03
 :: # Kodi Portable Installer v0.03
 :: # [if executed with "--debug" print all executed commands]
 :: #####################################################################
+
 
 for %%a in (%*) do (
     if [%%~a]==[--help] (
@@ -152,12 +154,9 @@ choice /C 123 /N /M "Select the codename to install: "
 :: # x86, x64 Win32, Win64
 :: #########################
 if "%errorlevel%" == "1" (
-    echo This does not work atm.
-    pause
-    goto :kbuild
     set $KCodename=Nexus
     set Redistributable=vc2019
-    set fList=%$_Nexus%%$_Nexus%
+    set fList=%$_Nexus%
 )
 
 if "%errorlevel%" == "2" (
@@ -319,14 +318,6 @@ if "%errorlevel%" == "2" (
 	echo.
 ) 
 
-if "%errorlevel%" == "1" (
-	set CPU=86
-	set $KArchitecture=32
-) else (
-	set CPU=64
-	set $KArchitecture=64
-)
-
 timeout /t 1 /nobreak > NUL
 EXIT /B 0
 
@@ -405,7 +396,7 @@ set $Matrix=19.5
 set $Leia=18.9
 set $Krypton=17.6
 set $_DownloadBaseUrl=http://mirrors.kodi.tv/releases/windows/
-set $_Nexus=20.0-rc2 20-rc1 20-beta1 
+set $_Nexus=20.0
 set $_Matrix=19.5 19.4 19.3 19.2 19.0 
 set $_Leia=18.9 18.8 18.7 
 
@@ -416,7 +407,7 @@ if exist %PPATH%%~n0.conf (del %PPATH%%~n0.conf)
 set "kodi_config=%PPATH%%~n0.conf"
 echo Saving config: [%~n0.conf]
 (
-  echo # config file for install-kodi.bat
+  echo # kodi portable v%kpi_ver% config
   echo ###################################
   echo $KInstallDir=%$KInstallDir%
   echo $KCodename=%$KCodename%
@@ -425,13 +416,6 @@ echo Saving config: [%~n0.conf]
   echo $KArchitecture=%$KArchitecture%
   echo.
   echo # Installer versions
-  echo ###################################
-  echo $Nexus=%$Nexus%
-  echo $Matrix=%$Matrix%
-  echo $Leia=%$Leia%
-  echo $Krypton=%$Krypton%
-  echo.
-  echo # Installer versions alt idea
   echo ###################################
   echo $_DownloadBaseUrl=%$_DownloadBaseUrl%
   echo $_Nexus=%$_Nexus%
@@ -535,7 +519,7 @@ exit /b 0
   exit /B %exit_code%
 
 :KUSAGE
-echo KPortable v0.x help
+echo Kodi Portable v%kpi_ver% help
 for %%f in ("%0") do set cmdline=%%~nf
 echo Usage: %cmdline% ^<A^> ^<B^> ^<C^>
 exit /B 1
