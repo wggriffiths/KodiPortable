@@ -93,12 +93,13 @@ cls
 	echo. 
 	echo   1^) Rebuild ^(this will delete the current build^)
 	echo   2^) Open Kodi
-	echo   3^) Save 'Portable_data'
-    echo   4^) Create Portable App ^(PortableApps.com^)
+    echo   3^) Open Kodi (debug kodi.log)
+	echo   4^) Save 'Portable_data'
+    echo   5^) Create Portable App ^(PortableApps.com^)
 	echo   x^) Exit 
 	echo. 
 	echo. 
-	choice /C 1234x /N /M "Choose an option: "
+	choice /C 12345x /N /M "Choose an option: "
 	echo.
 
 	if "%errorlevel%" == "1" (
@@ -116,15 +117,19 @@ cls
 	)
 
 	if "%errorlevel%" == "3" (
+        call :kdebugkodilog
+	)
+
+	if "%errorlevel%" == "4" (
         call :save_portabledata
         ver > nul
 	)
 
-	if "%errorlevel%" == "4" (
+	if "%errorlevel%" == "5" (
         call :create_papp
 	)
 
-	if "%errorlevel%" == "5" (
+	if "%errorlevel%" == "6" (
         set ExitMenu=1
         goto :exitmenu
 	)
@@ -505,6 +510,42 @@ echo.
 choice /c %cList% /n /m "Make a selection: "
 set $file=!arr[%errorlevel%]!
 exit /b 0
+
+:: # Debug Kodi Log
+:: #################################
+:kdebugkodilog
+cls
+
+set "advancedsettingsxml=%KODI_ROOT%\portable_data\userdata\advancedsettings.xml"
+
+echo *-------------------------------------------------------------*
+echo * Kodi Log Level
+echo *-------------------------------------------------------------*
+echo.
+echo   0^) Level 0
+echo   1^) Level 1
+echo   2^) Level 2
+echo   3^) Level 3
+echo.
+echo.
+choice /C 0123 /N /M "Choose an option: "
+echo.
+
+set /a kLoglevel=%errorlevel%-1
+
+if "%errorlevel%" NEQ "0" (
+    (
+    echo ^<advancedsettings^>
+    echo     ^<loglevel^>%kLoglevel%^</loglevel^>
+    echo ^</advancedsettings^>
+    ) > "%advancedsettingsxml%" || goto :fail
+)
+
+start %KODI_ROOT%\start-kodi.bat
+timeout /t 2 /nobreak > NUL
+start "loglevel: %kLoglevel% [CTRL+C to Exit]" %PPATH%bin\tail -f %KODI_ROOT%\portable_data\kodi.log
+if exist %KODI_ROOT%\portable_data\userdata\advancedsettings.xml (del %KODI_ROOT%\portable_data\userdata\advancedsettings.xml)
+exit /B 0
 
 :: # Error Handling
 :: ##################
