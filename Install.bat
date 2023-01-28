@@ -1,10 +1,9 @@
 @echo off
 
-set kpi_ver=0.03
 :: # Kodi Portable Installer v0.03
 :: # [if executed with "--debug" print all executed commands]
 :: #####################################################################
-
+set kpi_ver=0.03
 
 for %%a in (%*) do (
     if [%%~a]==[--help] (
@@ -24,6 +23,7 @@ IF "%~1"=="/?" (
     EXIT /B
 )
 
+:: remove the :: for console
 :: if [%1]==[] goto :KUSAGE
 
 :: # Get Admin
@@ -542,7 +542,27 @@ if "%errorlevel%" NEQ "0" (
 )
 
 start %KODI_ROOT%\start-kodi.bat
-timeout /t 2 /nobreak > NUL
+
+set filename=*.log
+set curfiletime=0
+
+cd %KODI_ROOT%\portable_data
+
+:checkfiletime
+for /f %%i in ('"forfiles /m %filename% /c "cmd /c echo @ftime" "') do set modif_time=%%i
+
+if %curfiletime% NEQ 0 (
+	if %curfiletime% NEQ %modif_time% (
+		echo file just changed
+		goto :loadkodilog
+	)
+)
+
+set curfiletime=%modif_time%
+timeout /T 1 > nul
+goto :checkfiletime
+
+:loadkodilog
 start "loglevel: %kLoglevel% [CTRL+C to Exit]" %PPATH%bin\tail -f %KODI_ROOT%\portable_data\kodi.log
 if exist %KODI_ROOT%\portable_data\userdata\advancedsettings.xml (del %KODI_ROOT%\portable_data\userdata\advancedsettings.xml)
 exit /B 0
