@@ -5,6 +5,18 @@
 :: #####################################################################
 set kpi_ver=0.03
 
+:: # Command line arguments:
+:: #
+:: # [to be implemented, possible list of commands]
+:: # 
+:: # install build nexus 20.03 64
+:: #      -- open
+:: #         open debug [0-3]
+:: #         portabledata save
+:: #         portabledata load
+:: #         --help
+:: #         --debug (debug this script)
+:: ###################################################
 for %%a in (%*) do (
     if [%%~a]==[--help] (
         call ::KUSAGE
@@ -23,8 +35,8 @@ IF "%~1"=="/?" (
     EXIT /B
 )
 
-:: remove the :: for console
-:: if [%1]==[] goto :KUSAGE
+:: remove '::' for console only
+::if [%1]==[] goto :KUSAGE
 
 :: # Get Admin
 :: #############
@@ -553,7 +565,6 @@ for /f %%i in ('"forfiles /m %filename% /c "cmd /c echo @ftime" "') do set modif
 
 if %curfiletime% NEQ 0 (
 	if %curfiletime% NEQ %modif_time% (
-		echo file just changed
 		goto :loadkodilog
 	)
 )
@@ -565,20 +576,24 @@ goto :checkfiletime
 :loadkodilog
 start "loglevel: %kLoglevel% [CTRL+C to Exit]" %PPATH%bin\tail -f %KODI_ROOT%\portable_data\kodi.log
 if exist %KODI_ROOT%\portable_data\userdata\advancedsettings.xml (del %KODI_ROOT%\portable_data\userdata\advancedsettings.xml)
+
 exit /B 0
 
 :: # Error Handling
 :: ##################
 :fail
-  set exit_code=%ERRORLEVEL%
-  echo.
-  echo #####################################################################
-  echo # Kodi Portable FAILED! Err: %errorlevel%
-  echo #####################################################################
-  echo.
-  timeout /T 60
-  exit /B %exit_code%
+set exit_code=%ERRORLEVEL%
+echo.
+echo #####################################################################
+echo # Kodi Portable FAILED! Err: %errorlevel%
+echo #####################################################################
+echo.
+timeout /T 60
+exit /B %exit_code%
 
+:: # Command line usage
+:: # not implemented 
+:: ######################
 :KUSAGE
 echo Kodi Portable v%kpi_ver% help
 echo.
