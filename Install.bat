@@ -12,8 +12,8 @@ set kpi_ver=0.03
 :: # install build nexus 20.03 64
 :: #      -- open
 :: #         open debug [0-3]
-:: #         portabledata save
-:: #         portabledata load
+:: #         portabledata save [file]
+:: #         portabledata load [file]
 :: #         --help
 :: #         --debug (debug this script)
 :: ###################################################
@@ -445,9 +445,9 @@ EXIT /B 0
 
 :: # Get file list function.
 :: #
-:: # Argumnets: $fSearch=pattern e.g set $fSearch=*.doc
+:: # Arguments: $fSearch=pattern e.g set $fSearch=*.doc
 :: #            $sTitle=Title to display
-:: # Retun:     $file
+:: # Return:     $file
 :: #
 :: #######################################################
 :getfilelist
@@ -486,9 +486,9 @@ exit /b 0
 
 :: # Get versions function.
 :: #
-:: # Argumnets: $fList=ver pattern list
+:: # Arguments: $fList=ver pattern list
 :: #            $sTitle=Title to display
-:: # Retun:     $file
+:: # Return:     $file
 :: #
 :: ###########################################################
 :setversion
@@ -562,7 +562,6 @@ cd %KODI_ROOT%\portable_data
 
 :checkfiletime
 for /f %%i in ('"forfiles /m %filename% /c "cmd /c echo @ftime" "') do set modif_time=%%i
-
 if %curfiletime% NEQ 0 (
 	if %curfiletime% NEQ %modif_time% (
 		goto :loadkodilog
@@ -574,15 +573,27 @@ timeout /T 1 > nul
 goto :checkfiletime
 
 :loadkodilog
-start "loglevel: %kLoglevel% [CTRL+C to Exit]" %PPATH%bin\tail -f %KODI_ROOT%\portable_data\kodi.log
+start  "LOGLEVEL: %kLoglevel% [CTRL+C to Exit]" %PPATH%bin\tail -f %KODI_ROOT%\portable_data\kodi.log
 if exist %KODI_ROOT%\portable_data\userdata\advancedsettings.xml (del %KODI_ROOT%\portable_data\userdata\advancedsettings.xml)
+exit /B 0
 
+:: # Get PID function.
+:: #
+:: # Arguments: [windows title]
+:: # Return:     PID
+:: # e.g call getpid kodi - get PID of windowstitle 'kodi'
+:: #     call getpid kodi* - get PID of windowstitle that 
+:: #     start with kodi
+:: ################################################################
+:getpid
+for /f "delims=" %%a in ('tasklist /fo list /fi "WINDOWTITLE eq  %~1" ^| findstr /i "PID"') do set "PID=%%a"
+for /f "tokens=2" %%i in ("%PID%") do set PID="%%i"
 exit /B 0
 
 :: # Error Handling
 :: ##################
 :fail
-set exit_code=%ERRORLEVEL%
+set exit_code=%errorlevel%
 echo.
 echo #####################################################################
 echo # Kodi Portable FAILED! Err: %errorlevel%
@@ -592,7 +603,6 @@ timeout /T 60
 exit /B %exit_code%
 
 :: # Command line usage
-:: # not implemented 
 :: ######################
 :KUSAGE
 echo Kodi Portable v%kpi_ver% help
@@ -604,4 +614,5 @@ echo Example:
 echo    install Nexus 20.0 64
 echo    install Nexus 20.0 86
 exit /B 1
+
 :eof
