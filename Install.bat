@@ -35,8 +35,10 @@ IF "%~1"=="/?" (
     EXIT /B
 )
 
+:: if [%1]==[] goto :KUSAGE
+
 :: remove '::' for console only
-::if [%1]==[] goto :KUSAGE
+:: goto :eof
 
 :: # Get Admin
 :: #############
@@ -255,13 +257,12 @@ echo Creating [%start_kodi%]...
   echo if exist "%%USERPROFILE%%\Desktop\Kodi.lnk" (
   echo     :start_kodi
   echo     echo starting kodi
-  echo     kodi.exe -p
+  echo     start "Kodi Portable" kodi.exe -p
   echo     goto eof
   echo ^)
   echo.
   echo echo creating shortcut
   echo set SCRIPT="%%PPATH%%\%%RANDOM%%-%%RANDOM%%-%%RANDOM%%-%%RANDOM%%.vbs"
-  echo echo Set oWS = WScript.CreateObject("WScript.Shell"^) ^>^> %%SCRIPT%%
   echo echo Set oWS = WScript.CreateObject("WScript.Shell"^) ^>^> %%SCRIPT%%
   echo ^echo sLinkFile = "%USERPROFILE%\Desktop\Kodi.lnk" ^>^> %%SCRIPT%%
   echo ^echo Set oLink = oWS.CreateShortcut(sLinkFile^) ^>^> %%SCRIPT%%
@@ -414,8 +415,8 @@ set $Leia=18.9
 set $Krypton=17.6
 set $_DownloadBaseUrl=http://mirrors.kodi.tv/releases/windows/
 set $_Nexus=20.0
-set $_Matrix=19.5 19.4 19.3 19.2 19.0 
-set $_Leia=18.9 18.8 18.7 
+set $_Matrix=19.5 19.4 19.3 19.2 19.0
+set $_Leia=18.9 18.8 18.7
 
 :: # Save configuration
 :: ######################
