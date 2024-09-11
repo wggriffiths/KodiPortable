@@ -163,9 +163,10 @@ echo *-------------------------------------------------------------*
 echo * Kodi Codename
 echo *-------------------------------------------------------------*
 echo. 
-echo   1. Nexus 
-echo   2. Matrix
-echo   3. Leia
+echo   1. Omega
+echo   2. Nexus 
+echo   3. Matrix
+echo   4. Leia
 echo. 
 echo. 
 choice /C 123 /N /M "Select the codename to install: "
@@ -173,18 +174,24 @@ choice /C 123 /N /M "Select the codename to install: "
 :: # x86, x64 Win32, Win64
 :: #########################
 if "%errorlevel%" == "1" (
-    set $KCodename=Nexus
-    set Redistributable=vc2019
-    set fList=%$_Nexus%
+    set $KCodename=Omega
+    set Redistributable=vcredist
+    set fList=%$_Omega%
 )
 
 if "%errorlevel%" == "2" (
+    set $KCodename=Nexus
+    set Redistributable=vcredist
+    set fList=%$_Nexus%
+)
+
+if "%errorlevel%" == "3" (
     set $KCodename=Matrix
     set Redistributable=vc2019
     set fList=%$_Matrix%
 )
 
-if "%errorlevel%" == "3" (
+if "%errorlevel%" == "4" (
     set $KCodename=Leia
     set Redistributable=vc2017
     set fList=%$_Leia%
@@ -226,9 +233,9 @@ if %errorlevel% NEQ 0 (
     	%PPATH%bin\7z.exe x -o"%KODI_ROOT%" "%PPATH%%$pfile%"
     )
     
-    rem # install Visual C++ 2017(x%CPU%) Redistributable
+    rem # Install Microsoft Visual C++ (x%CPU%) Redistributable
     rem ###################################################
-    echo Installing: Visual C++ 2017^(x%CPU%^) Redistributable
+    echo Installing: Microsoft Visual C++ ^(x%CPU%^) Redistributable
     if exist %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe (
         start /wait %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe /s
         timeout /t 4
@@ -344,7 +351,7 @@ EXIT /B 0
 :: #  
 :: ###################################################
 :create_papp
-echo Create portable app
+echo Create portable app - not implemented
 timeout /t 2 /nobreak > NUL
 EXIT /B 0
 
@@ -414,7 +421,8 @@ set $Matrix=19.5
 set $Leia=18.9
 set $Krypton=17.6
 set $_DownloadBaseUrl=http://mirrors.kodi.tv/releases/windows/
-set $_Nexus=20.0
+set $_Omega=21.1,21.0
+set $_Nexus=20.2,20.1,20.0
 set $_Matrix=19.5 19.4 19.3 19.2 19.0
 set $_Leia=18.9 18.8 18.7
 
@@ -436,6 +444,7 @@ echo Saving config: [%~n0.conf]
   echo # Installer versions
   echo ###################################
   echo $_DownloadBaseUrl=%$_DownloadBaseUrl%
+  echo $_Omega=%$_Omega%
   echo $_Nexus=%$_Nexus%
   echo $_Matrix=%$_Matrix%
   echo $_Leia=%$_Leia%
