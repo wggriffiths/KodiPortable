@@ -1,6 +1,6 @@
 @echo off
 
-:: # Kodi Portable Installer v0.03
+:: # Kodi Portable Installer v0.05
 :: # [if executed with "--debug" print all executed commands]
 :: #####################################################################
 set kpi_ver=0.03
