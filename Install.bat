@@ -3,7 +3,7 @@
 :: # Kodi Portable Installer v0.05
 :: # [if executed with "--debug" print all executed commands]
 :: #####################################################################
-set kpi_ver=0.03
+set kpi_ver=0.05
 
 :: # Command line arguments:
 :: #
