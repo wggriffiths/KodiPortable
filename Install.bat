@@ -263,6 +263,8 @@ echo Creating [%start_kodi%]...
   echo CD /D "%%~dp0%"
   echo set PPATH=%%~dp0%
   echo.
+  echo for /f "tokens=*" %%i in ('powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"') do set DESKTOP_PATH=%%i
+  echo.
   echo if exist "%%USERPROFILE%%\Desktop\Kodi.lnk" (
   echo     :start_kodi
   echo     echo starting kodi
@@ -273,7 +275,7 @@ echo Creating [%start_kodi%]...
   echo echo creating shortcut
   echo set SCRIPT="%%PPATH%%\%%RANDOM%%-%%RANDOM%%-%%RANDOM%%-%%RANDOM%%.vbs"
   echo echo Set oWS = WScript.CreateObject("WScript.Shell"^) ^>^> %%SCRIPT%%
-  echo ^echo sLinkFile = "%USERPROFILE%\Desktop\Kodi.lnk" ^>^> %%SCRIPT%%
+  echo ^echo sLinkFile = "%DESKTOP_PATH%\Kodi.lnk" ^>^> %%SCRIPT%%
   echo ^echo Set oLink = oWS.CreateShortcut(sLinkFile^) ^>^> %%SCRIPT%%
   echo ^echo oLink.TargetPath = "%%PPATH%%start-kodi.bat" ^>^> %%SCRIPT%%
   echo ^echo oLink.IconLocation = "%%PPATH%%\kodi.exe" ^>^> %%SCRIPT%%
