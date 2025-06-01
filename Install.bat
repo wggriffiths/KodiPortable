@@ -260,12 +260,12 @@ echo Creating [%start_kodi%]...
   echo mode con:cols=55 lines=3
   echo.
   echo pushd "%%CD%%"
-  echo CD /D "%%~dp0%"
-  echo set PPATH=%%~dp0%
+  echo CD /D "%%~dp0"
+  echo set PPATH=%%~dp0
   echo.
-  echo for /f "tokens=*" %%i in ('powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"') do set DESKTOP_PATH=%%i
+  echo for /f "tokens=*" %%%%i in ^('powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"'^) do set DESKTOP_PATH=%%%%i
   echo.
-  echo if exist "%%USERPROFILE%%\Desktop\Kodi.lnk" (
+  echo if exist "%%DESKTOP_PATH%%\Kodi.lnk" (
   echo     :start_kodi
   echo     echo starting kodi
   echo     start "Kodi Portable" kodi.exe -p
@@ -273,14 +273,13 @@ echo Creating [%start_kodi%]...
   echo ^)
   echo.
   echo echo creating shortcut
-  echo set SCRIPT="%%PPATH%%\%%RANDOM%%-%%RANDOM%%-%%RANDOM%%-%%RANDOM%%.vbs"
+  echo set SCRIPT="%%PPATH%%\%%RANDOM%%-%%RANDOM%%.vbs"
   echo echo Set oWS = WScript.CreateObject("WScript.Shell"^) ^>^> %%SCRIPT%%
-  echo ^echo sLinkFile = "%DESKTOP_PATH%\Kodi.lnk" ^>^> %%SCRIPT%%
-  echo ^echo Set oLink = oWS.CreateShortcut(sLinkFile^) ^>^> %%SCRIPT%%
-  echo ^echo oLink.TargetPath = "%%PPATH%%start-kodi.bat" ^>^> %%SCRIPT%%
-  echo ^echo oLink.IconLocation = "%%PPATH%%\kodi.exe" ^>^> %%SCRIPT%%
-  echo ^echo oLink.Save ^>^> %%SCRIPT%%
-  echo.
+  echo echo sLinkFile = "%%DESKTOP_PATH%%\Kodi.lnk" ^>^> %%SCRIPT%%
+  echo echo Set oLink = oWS.CreateShortcut(sLinkFile^) ^>^> %%SCRIPT%%
+  echo echo oLink.TargetPath = "%%PPATH%%start-kodi.bat" ^>^> %%SCRIPT%%
+  echo echo oLink.IconLocation = "%%PPATH%%\kodi.exe" ^>^> %%SCRIPT%%
+  echo echo oLink.Save ^>^> %%SCRIPT%%
   echo.
   echo cscript /nologo %%SCRIPT%%
   echo del %%SCRIPT%%
@@ -288,7 +287,7 @@ echo Creating [%start_kodi%]...
   echo.
   echo :eof
   echo exit
-) >"%start_kodi%" || goto :fail
+) > "%start_kodi%" || goto :fail
 
 echo *-------------------------------------------------------------*
 echo * Kodi Portable Installation Complete..                       *
