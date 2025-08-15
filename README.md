@@ -1,3 +1,5 @@
+<img width="713" height="459" alt="image" src="https://github.com/user-attachments/assets/0d39b761-bdf5-4faa-b43b-df97836496bf" />
+
 ## Script Overview
 
 The Kodi Portable Installer is designed to install and manage portable versions of Kodi on a Windows system. It handles various tasks such as downloading builds, managing portable data, and creating shortcuts for easy access. The script uses command-line arguments for functionality and supports both user interaction and debugging modes.
