@@ -5,7 +5,10 @@ add-on sources, and the generated packages installed by the setup.
 
 Read these files first:
 
-- [AGENTS.md](AGENTS.md) — source-of-truth rules and change workflow.
+- [Install.bat](Install.bat) — installer and rebuild workflow.
+- [Install.conf](Install.conf) — local installer configuration and Kodi version choices.
+- [build-kodi-repository.ps1](build-kodi-repository.ps1) — public add-on repository build.
+- [.github/workflows/publish-kodi-repository.yml](.github/workflows/publish-kodi-repository.yml) — GitHub Pages publishing workflow.
 - [cocoscrapers-source/README.md](cocoscrapers-source/README.md) — complete
   CocoScrapers package source.
 - [cocoscrapers-patches/README.md](cocoscrapers-patches/README.md) — legacy
