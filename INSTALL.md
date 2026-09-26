@@ -12,10 +12,10 @@ runtime. Use Kodi Matrix 19.x, Nexus 20.x, or Omega 21.x for these add-ons.
 The installer can still download older Leia builds, but Fen Light and
 CocoScrapers are not intended for Kodi Leia.
 
-The current published versions are:
+The current project versions are:
 
 - Tinkerer Kodi Repository: `1.0.2`
-- Fen Light: `2.2.05.3`
+- Fen Light: `2.2.05.4`
 - CocoScrapers: `1.0.32.2`
 
 ## Method 1: local portable installation
@@ -102,7 +102,9 @@ location that Kodi Nexus could reject with **Could not connect to repository**.
 
 ### Configure Fen Light to use CocoScrapers
 
-On a clean Kodi profile, external scrapers are disabled by default:
+On a new private Fen Light profile, the installer enables External Scrapers
+and selects CocoScrapers automatically. Existing Fen Light profiles keep
+their current external-scraper choice. If it needs to be selected manually:
 
 1. Open Fen Light.
 2. Open **Settings**.

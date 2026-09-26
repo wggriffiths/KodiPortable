@@ -52,6 +52,16 @@ class PrivateForkPolicy:
 		set_setting('update.username', '')
 		set_setting('update.location', '')
 		set_setting('reuse_language_invoker', 'true')
+		# On a new private profile, select the paired CocoScrapers module so
+		# Fen Light is usable immediately. Preserve an existing user's choice.
+		if (
+			kodi_utils.addon_installed('script.module.cocoscrapers') and
+			get_setting('external_scraper.module', 'empty_setting') in ('', 'empty_setting')
+		):
+			set_setting('provider.external', 'true')
+			set_setting('external_scraper.module', 'script.module.cocoscrapers')
+			set_setting('external_scraper.name', 'CocoScrapers Module')
+			kodi_utils.logger('Fen Light', 'Defaulted External Scrapers to CocoScrapers')
 		return kodi_utils.logger('Fen Light', 'PrivateForkPolicy Service Finished')
 
 class OnUpdateChanges:
@@ -105,7 +115,11 @@ class CustomWindowsPrepare:
 		monitor, player = kodi_utils.kodi_monitor(), kodi_utils.kodi_player()
 		wait_for_abort, is_playing = monitor.waitForAbort, player.isPlayingVideo
 		kodi_utils.clear_property(current_skin_prop)
+		if monitor.abortRequested():
+			return kodi_utils.logger('Fen Light', 'CustomWindowsPrepare Service Finished')
 		ExtrasUtils().run()
+		if monitor.abortRequested():
+			return kodi_utils.logger('Fen Light', 'CustomWindowsPrepare Service Finished')
 		font_utils = FontUtils()
 		while not monitor.abortRequested():
 			font_utils.execute_custom_fonts()
@@ -124,7 +138,9 @@ class TraktMonitor:
 		monitor, player = kodi_utils.kodi_monitor(), kodi_utils.kodi_player()
 		wait_for_abort, is_playing = monitor.waitForAbort, player.isPlayingVideo
 		while not monitor.abortRequested():
-			while is_playing() or kodi_utils.get_property(pause_services_prop) == 'true': wait_for_abort(10)
+			while is_playing() or kodi_utils.get_property(pause_services_prop) == 'true':
+				if wait_for_abort(10): break
+			if monitor.abortRequested(): break
 			wait_time = 1800
 			try:
 				sync_interval, wait_time = trakt_sync_interval()
@@ -229,13 +245,13 @@ class AddonXMLCheck:
 	def change_xml_file(self):
 		if not self.change_list: return
 		if 'icon' in self.change_list: self.reassign_addon_icon()
-		kodi_utils.notification('Refreshing Addon XML. Restarting Addons')
+		kodi_utils.notification('Fen Light metadata updated. Restart Kodi to apply it')
 		new_xml = str(self.root.toxml()).replace('<?xml version="1.0" ?>', '')
 		with open(self.addon_xml, 'w') as f: f.write(new_xml)
-		kodi_utils.logger('Fen Light', 'AddonXMLCheck Service - Change Detected. Restarting Addons')
-		kodi_utils.execute_builtin('ActivateWindow(Home)', True)
-		kodi_utils.update_local_addons()
-		kodi_utils.disable_enable_addon()
+		# Do not disable/re-enable Fen from inside its own service. Kodi can
+		# wait for the old Python invoker to stop, which causes a visible stall
+		# and can interfere with Kodi shutdown. The XML is picked up next launch.
+		kodi_utils.logger('Fen Light', 'AddonXMLCheck Service - Change detected; restart deferred until next Kodi launch')
 
 	def reassign_addon_icon(self):
 		from indexers.dialogs import addon_icon_choice

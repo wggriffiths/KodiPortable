@@ -4,7 +4,7 @@ This directory contains the complete Fen Light add-on source used by the
 private package installed by this repository.
 
 - Add-on ID: `plugin.video.fenlight`
-- Current local version: `2.2.05.3`
+- Current local version: `2.2.05.4`
 - Package: `..\packages\plugin.video.fenlight-private.zip`
 - Changelog: `plugin.video.fenlight\resources\text\changelog.txt`
 
@@ -23,9 +23,14 @@ The fork contains the local language/audio behavior, Media Info 3 defaults,
 playback and shutdown hardening, and the disabled upstream updater. The
 Premiumize-specific behavior was left outside the requested changes.
 
-The source manifest uses `2.2.05.3`, incrementing the upstream `2.2.05`
+The source manifest uses `2.2.05.4`, incrementing the upstream `2.2.05`
 version for this private patch release. The private package name also
 distinguishes this locally built package from an upstream download.
+
+New private profiles automatically select the paired CocoScrapers module for
+Fen Light. Existing external-scraper selections are preserved. Fen metadata
+changes are applied on the next Kodi launch instead of hot-restarting the
+add-on service, and background skin/Trakt work checks Kodi's abort state.
 
 The changelog begins with a marked private-build entry, followed by the
 upstream Fen Light release history.
