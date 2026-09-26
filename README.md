@@ -15,7 +15,7 @@ Read these files first:
 
 - [INSTALL.md](INSTALL.md) — installation, repository setup, updates, and troubleshooting.
 - [Install.bat](Install.bat) — installer and rebuild workflow.
-- [Install.conf](Install.conf) — local installer configuration and Kodi version choices.
+- `Install.conf` — generated locally on first run for installer configuration and Kodi version choices; it is intentionally not tracked.
 - [build-kodi-repository.ps1](build-kodi-repository.ps1) — public add-on repository build.
 - [.github/workflows/publish-kodi-repository.yml](.github/workflows/publish-kodi-repository.yml) — GitHub Pages publishing workflow.
 - [cocoscrapers-source/README.md](cocoscrapers-source/README.md) — complete
@@ -48,6 +48,26 @@ changes are pushed to `main`.
 Install `kodi-repo\repository.tinkerer-1.0.2.zip`
 once in Kodi with **Install from zip file**. Later add-on versions can then be
 installed from Tinkerer Kodi Repository.
+
+## Language preferences
+
+The private build is tuned for English playback by default. Fen Light's menus
+and metadata are primarily English. The paired CocoScrapers package enables
+**Remove identified Foreign single audio sources** by default, which filters
+release names that clearly identify foreign-only audio while retaining known
+English and multi-language releases. It cannot inspect every audio track inside
+every video file.
+
+For English playback, set Kodi's **Preferred audio language** to **English**
+under **Settings → Player → Language**, then leave the CocoScrapers foreign
+single-audio filter enabled under **Fen Light → Tools → External Scraper
+Settings**.
+
+Non-English users should set Kodi's preferred audio and subtitle languages to
+their own languages and disable **Remove identified Foreign single audio
+sources** in the CocoScrapers settings. Kodi's preferred audio language is
+also used to select the correct track when a stream contains more than one
+audio track.
 
 ## Script Overview
 
