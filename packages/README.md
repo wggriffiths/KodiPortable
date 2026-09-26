@@ -8,8 +8,8 @@ this README is kept so the directory remains self-explanatory.
 
 | Package | Built from | Add-on version |
 | --- | --- | --- |
-| `script.module.cocoscrapers-private.zip` | `..\cocoscrapers-source\script.module.cocoscrapers` | `1.0.32.2` |
-| `plugin.video.fenlight-private.zip` | `..\fenlight-source\plugin.video.fenlight` | `2.2.05.4` |
+| `script.module.cocoscrapers-private.zip` | `..\cocoscrapers-source\script.module.cocoscrapers` | `1.0.32.3` |
+| `plugin.video.fenlight-private.zip` | `..\fenlight-source\plugin.video.fenlight` | `2.2.05.6` |
 
 The ZIPs contain the integrated source changes and their corresponding
 changelogs. They are not hand-edited: make changes in the source directories

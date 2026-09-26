@@ -4,7 +4,7 @@ This directory contains the complete Fen Light add-on source used by the
 private package installed by this repository.
 
 - Add-on ID: `plugin.video.fenlight`
-- Current local version: `2.2.05.5`
+- Current local version: `2.2.05.6`
 - Package: `..\packages\plugin.video.fenlight-private.zip`
 - Changelog: `plugin.video.fenlight\resources\text\changelog.txt`
 
@@ -19,11 +19,13 @@ There is no separate Fen Light patch overlay. Do not patch only the live
 
 ## Local changes currently included
 
-The fork contains the local language/audio behavior, Fanart view defaults,
+The fork contains the local language/audio behavior, selectable external
+scraper source languages, selectable Confluence video-view presets with
+Fanart as the default,
 playback and shutdown hardening, and the disabled upstream updater. The
 Premiumize-specific behavior was left outside the requested changes.
 
-The source manifest uses `2.2.05.5`, incrementing the upstream `2.2.05`
+The source manifest uses `2.2.05.6`, incrementing the upstream `2.2.05`
 version for this private patch release. The private package name also
 distinguishes this locally built package from an upstream download.
 

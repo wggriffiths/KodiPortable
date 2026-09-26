@@ -15,8 +15,8 @@ CocoScrapers are not intended for Kodi Leia.
 The current project versions are:
 
 - Tinkerer Kodi Repository: `1.0.2`
-- Fen Light: `2.2.05.4`
-- CocoScrapers: `1.0.32.2`
+- Fen Light: `2.2.05.6`
+- CocoScrapers: `1.0.32.3`
 
 ## Method 1: local portable installation
 
@@ -117,6 +117,19 @@ their current external-scraper choice. If it needs to be selected manually:
 If CocoScrapers is installed but does not appear in Fen Light, first check
 that **External Scrapers â†’ Enable** is on. The module will not be selectable
 while that setting is disabled.
+
+### Choose source language and view
+
+In Fen Light, open **Settings -> Streaming Accounts -> External Scrapers** and
+use **Preferred Source Language**. English is selected by default; choose
+**Any Language** or a supported language when required. This controls the
+paired CocoScrapers release-name filter and does not translate Fen Light's
+menus.
+
+To change the video view, open **Settings -> Content -> General** and use
+**Default Video View**. The available Confluence presets are **Fanart** and
+**Media Info 3**. Other skins can continue to use **Tools -> Set Views** or
+the manual view IDs.
 
 ## Preserving accounts and settings
 

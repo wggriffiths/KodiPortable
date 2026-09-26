@@ -2,8 +2,8 @@
 
 Kodi Portable is an unofficial Windows portable Kodi build and add-on
 repository for Kodi Matrix, Nexus, and Omega. It packages an independent Fen
-Light fork with a paired CocoScrapers module, provider updates, English audio
-filtering, playback and shutdown fixes, Fanart view defaults, and GitHub
+Light fork with a paired CocoScrapers module, provider updates, selectable source
+language filtering, playback and shutdown fixes, Fanart view defaults, and GitHub
 Pages delivery.
 
 This project is independent and is not affiliated with Kodi, the original Fen
@@ -51,23 +51,23 @@ installed from Tinkerer Kodi Repository.
 
 ## Language preferences
 
-The private build is tuned for English playback by default. Fen Light's menus
-and metadata are primarily English. The paired CocoScrapers package enables
-**Remove identified Foreign single audio sources** by default, which filters
-release names that clearly identify foreign-only audio while retaining known
-English and multi-language releases. It cannot inspect every audio track inside
-every video file.
+The private build prefers English playback by default. Fen Light's menus and
+metadata are primarily English. In **Fen Light -> Settings -> Streaming
+Accounts -> External Scrapers**, use **Preferred Source Language** to choose
+English, Any Language, or a supported non-English language. The setting is
+used by the paired CocoScrapers package to filter release names that clearly
+identify another language. It cannot inspect every audio track inside every
+video file, and untagged releases remain available.
 
 For English playback, set Kodi's **Preferred audio language** to **English**
-under **Settings → Player → Language**, then leave the CocoScrapers foreign
-single-audio filter enabled under **Fen Light → Tools → External Scraper
-Settings**.
+under **Settings -> Player -> Language**, then leave **Preferred Source
+Language** set to English. The underlying CocoScrapers foreign single-audio
+setting remains available as a fallback for other Kodi add-ons.
 
-Non-English users should set Kodi's preferred audio and subtitle languages to
-their own languages and disable **Remove identified Foreign single audio
-sources** in the CocoScrapers settings. Kodi's preferred audio language is
-also used to select the correct track when a stream contains more than one
-audio track.
+Non-English users should set Fen Light's **Preferred Source Language** and
+Kodi's preferred audio and subtitle languages to their own languages. Kodi's
+preferred audio language is also used to select the correct track when a
+stream contains more than one audio track.
 
 ## Script Overview
 

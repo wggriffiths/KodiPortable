@@ -26,6 +26,7 @@ class source:
 		self.internal_activated, self.internal_prescraped = len(self.internal_scrapers) > 0, len(self.prescrape_sources) > 0
 		self.processed_prescrape, self.threads_completed = False, False
 		self.timeout = 60 if disabled_ext_ignored else int(get_setting('fenlight.results.timeout', '20'))
+		self.preferred_language = get_setting('fenlight.external.preferred_language', 'eng') or 'eng'
 		self.sources_total = self.sources_4k = self.sources_1080p = self.sources_720p = self.sources_sd = 0
 		self.final_total = self.final_4k = self.final_1080p = self.final_720p = self.final_sd = 0
 		self.count_tuple = (('sources_4k', '4K', self._quality_length), ('sources_1080p', '1080p', self._quality_length), ('sources_720p', '720p', self._quality_length),
@@ -45,15 +46,20 @@ class source:
 			self.single_expiry, self.season_expiry, self.show_expiry = info['expiry_times']
 			if self.media_type == 'movie':
 				self.season_divider, self.show_divider = 0, 0
-				self.data = {'imdb': info['imdb_id'], 'title': self.title, 'aliases': aliases, 'year': self.year}
+				self.data = {'imdb': info['imdb_id'], 'title': self.title, 'aliases': aliases, 'year': self.year,
+						'preferred_language': self.preferred_language}
 			else:
 				try: self.season_divider = [int(x['episode_count']) for x in self.meta['season_data'] if int(x['season_number']) == int(self.meta['season'])][0]
 				except: self.season_divider = 1
 				self.show_divider = int(self.meta['total_aired_eps'])
 				self.data = {'imdb': info['imdb_id'], 'tvdb': info['tvdb_id'], 'tvshowtitle': self.title, 'aliases': aliases,'year': self.year,
-							'title': ep_name, 'season': str(self.season), 'episode': str(self.episode)}
+							'title': ep_name, 'season': str(self.season), 'episode': str(self.episode), 'preferred_language': self.preferred_language}
+			self.cache_title = '%s|preferred_language:%s' % (self.title, self.preferred_language)
 		except: return []
-		return self.get_sources()
+		kodi_utils.set_property('fenlight.external.language_filter_active', 'true')
+		kodi_utils.set_property('fenlight.external.preferred_language', self.preferred_language)
+		try: return self.get_sources()
+		finally: kodi_utils.clear_property('fenlight.external.language_filter_active')
 
 	def get_sources(self):
 		def _scraperDialog():
@@ -125,13 +131,13 @@ class source:
 		self.threads_completed = True
 
 	def get_movie_source(self, provider, module):
-		sources = external_cache.get(provider, self.media_type, self.tmdb_id, self.title, self.year, '', '')
+		sources = external_cache.get(provider, self.media_type, self.tmdb_id, self.cache_title, self.year, '', '')
 		if sources == None:
 			sources = module().sources(self.data, self.host_dict)			
 			sources = self.process_sources(provider, sources)
 			if not sources: expiry_hours = 1
 			else: expiry_hours = self.single_expiry
-			external_cache.set(provider, self.media_type, self.tmdb_id, self.title, self.year, '', '', sources, expiry_hours)
+			external_cache.set(provider, self.media_type, self.tmdb_id, self.cache_title, self.year, '', '', sources, expiry_hours)
 		if sources:
 			if not self.background: self.process_quality_count(sources)
 			self.sources.extend(sources)
@@ -143,7 +149,7 @@ class source:
 			else: s_check = self.season
 			e_check = ''
 		else: s_check, e_check = self.season, self.episode
-		sources = external_cache.get(provider, self.media_type, self.tmdb_id, self.title, self.year, s_check, e_check)
+		sources = external_cache.get(provider, self.media_type, self.tmdb_id, self.cache_title, self.year, s_check, e_check)
 		if sources == None:
 			if pack == 'Show':
 				expiry_hours = self.show_expiry
@@ -156,7 +162,7 @@ class source:
 				sources = module().sources(self.data, self.host_dict)
 			sources = self.process_sources(provider, sources)
 			if not sources: expiry_hours = 1
-			external_cache.set(provider, self.media_type, self.tmdb_id, self.title, self.year, s_check, e_check, sources, expiry_hours)
+			external_cache.set(provider, self.media_type, self.tmdb_id, self.cache_title, self.year, s_check, e_check, sources, expiry_hours)
 		if sources:
 			if pack == 'Season': sources = [i for i in sources if not 'episode_start' in i or i['episode_start'] <= self.episode <= i['episode_end']]
 			elif pack == 'Show': sources = [i for i in sources if i['last_season'] >= self.season]

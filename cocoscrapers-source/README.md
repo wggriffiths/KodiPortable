@@ -4,7 +4,7 @@ This directory contains the complete CocoScrapers add-on source used to build
 the private package installed by this repository.
 
 - Add-on ID: `script.module.cocoscrapers`
-- Current local version: `1.0.32.2`
+- Current local version: `1.0.32.3`
 - Package: `..\packages\script.module.cocoscrapers-private.zip`
 - Changelog: `script.module.cocoscrapers\changelog.txt`
 
@@ -25,11 +25,14 @@ builds from this directory, not from `cocoscrapers-patches`.
   successful scraping path.
 - The local provider/source additions and related settings are part of this
   complete package.
+- Release-name filtering honors Fen Light's preferred external-scraper source
+  language when Fen Light is the caller. English is the default; Any Language
+  and supported non-English choices are available in Fen Light's settings.
 
 These changes are already included in the generated private package when it is
 rebuilt.
 
-The changelog starts with a marked `Private build 1.0.32.2` entry. Upstream
+The changelog starts with a marked `Private build 1.0.32.3` entry. Upstream
 release history remains below it.
 
 ## Build

@@ -28,6 +28,35 @@ SUBS = ('subita', 'subfrench', 'subspanish', 'subtitula', 'swesub', 'nl.subs')
 ENG_CHECK = ('.eng.', '.en.', 'english', 'multi')
 SRT_CHECK = ('with.srt', '.avi', '.mkv', '.mp4')
 
+PREFERRED_LANGUAGE_ACTIVE_PROPERTY = 'fenlight.external.language_filter_active'
+PREFERRED_LANGUAGE_PROPERTY = 'fenlight.external.preferred_language'
+PREFERRED_LANGUAGE_MARKERS = {
+	'eng': ENG_CHECK,
+	'ara': ('arabic', '.ara.'),
+	'ben': ('bengali', 'bgaudio', '.ben.'),
+	'chi': ('chinese', '.chi.', '.chs.', '.zho.'),
+	'dut': ('dutch', '.dut.', '.nld.', '.nl.'),
+	'fin': ('finnish', '.fin.'),
+	'fre': ('french', 'truefrench', '.fr.', '.fra.', '.fre.', '.frn.'),
+	'ger': ('german', '.de.', '.deu.', '.ger.'),
+	'ell': ('greek', '.ell.', '.gre.'),
+	'heb': ('hebrew', '.he.', '.heb.'),
+	'hin': ('hindi', '.hi.', '.hin.', '.hindi.'),
+	'ind': ('indonesian', '.ind.'),
+	'ita': ('italian', '.it.', '.ita.'),
+	'jpn': ('japanese', '.ja.', '.jap.', '.jpn.'),
+	'kor': ('korean', '.ko.', '.kor.'),
+	'pol': ('polish', '.pl.', '.pol.'),
+	'por': ('portuguese', '.pt.', '.por.', '.pob.'),
+	'rus': ('russian', '.ru.', '.rus.'),
+	'spa': ('spanish', 'castellano', 'latino', 'truespanish', '.es.', '.esl.', '.esp.', '.spa.', '.lat.'),
+	'swe': ('swedish', '.sv.', '.sve.', '.swe.'),
+	'tam': ('tamil', '.tam.'),
+	'tel': ('telugu', '.tel.'),
+	'tur': ('turkish', '.tr.', '.tur.'),
+	'ukr': ('ukrainian', '.ukr.')
+}
+
 UNDESIRABLES = ['400p.octopus', '720p.octopus', '1080p.octopus', 'alexfilm', 'amedia', 'audiobook', 'baibako', 'bigsinema', 'bonus.disc', 'casstudio.tv', 'courage.bambey',
 				'.cbr', '.cbz', 'coldfilm', 'dilnix', 'dutchreleaseteam', 'e.book.collection', 'empire.minutemen', 'eniahd', '.exe', 'exkinoray', 'extras.only',
 				'gears.media', 'gearsmedia', 'good.people', 'gostfilm', 'hamsterstudio', 'hdrezka', 'hdtvrip', 'hurtom', 'idea.film', 'ideafilm', 'jaskier', 'kapatejl6', 'kb.1080p',
@@ -91,6 +120,13 @@ def get_undesirables():
 
 def check_foreign_audio():
 	return False if home_getProperty('fs_filterless_search') == 'true' else getSetting('filter.foreign.single.audio') == 'true'
+
+def preferred_language():
+	if home_getProperty(PREFERRED_LANGUAGE_ACTIVE_PROPERTY) != 'true' or home_getProperty('fs_filterless_search') == 'true': return ''
+	try: language = home_getProperty(PREFERRED_LANGUAGE_PROPERTY).lower().strip()
+	except: language = ''
+	if language == 'any' or language in PREFERRED_LANGUAGE_MARKERS: return language
+	return ''
 
 def get_qual(term):
 	if any(i in term for i in SCR): return 'SCR'
@@ -180,7 +216,13 @@ def remove_lang(release_info, check_foreign_audio):
 	try:
 		if any(value in release_info for value in DUBBED): return True
 		if any(value in release_info for value in SUBS): return True
-		if check_foreign_audio:
+		selected_language = preferred_language()
+		if selected_language == 'any': pass
+		elif selected_language:
+			if 'multi' not in release_info:
+				matched_languages = [code for code, markers in PREFERRED_LANGUAGE_MARKERS.items() if any(value in release_info for value in markers)]
+				if matched_languages and selected_language not in matched_languages: return True
+		elif check_foreign_audio:
 			if any(value in release_info for value in LANG) and not any(value in release_info for value in ENG_CHECK): return True
 			if any(value in release_info for value in ABV_LANG) and not any(value in release_info for value in ENG_CHECK): return True
 		if release_info.endswith('.srt.') and not any(value in release_info for value in SRT_CHECK): return True

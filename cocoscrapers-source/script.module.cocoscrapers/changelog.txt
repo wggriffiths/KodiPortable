@@ -1,3 +1,14 @@
+[COLOR purple][B]Private build 1.0.32.3[/B][/COLOR]
+- Added language-aware release-name filtering driven by Fen Light's preferred
+  external-scraper source language setting. English is the default, with Any
+  Language and supported non-English choices available from Fen Light.
+- Explicitly tagged releases in another language are filtered while untagged
+  releases remain available; multi-language releases remain available. The
+  existing foreign single-audio setting remains the fallback for other Kodi
+  add-ons that do not provide the Fen Light preference.
+- The Fen Light preference is honored only during an active Fen scrape, so it
+  does not leak into another add-on using CocoScrapers in the same session.
+
 [COLOR purple][B]Private build 1.0.32.2[/B][/COLOR]
 - Compared with the original 1.0.32 source, added optional provider
   integrations for Prowlarr, Rutor, and ShowRSS, and updated the existing

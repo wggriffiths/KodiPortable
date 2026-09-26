@@ -165,6 +165,17 @@ def set_from_list(params):
 	setting_value = new_value[1]
 	set_setting(setting_id, setting_value)
 
+def set_default_video_view(params={}):
+	setting_id = 'view.default'
+	settings_options = default_setting_values(setting_id)['settings_options'].items()
+	settings_list = [(v, k) for k, v in settings_options]
+	new_value = kodi_utils.select_dialog(settings_list, **{'items': json.dumps([{'line1': item[0]} for item in settings_list]), 'heading': 'Choose Default Video View', 'narrow_window': 'true'})
+	if not new_value: return
+	setting_value = new_value[1]
+	set_setting(setting_id, setting_value)
+	for view_setting in ('view.movies', 'view.tvshows', 'view.seasons', 'view.episodes', 'view.episodes_single'):
+		set_setting(view_setting, setting_value)
+
 def set_source_folder_path(params):
 	setting_id = params['setting_id']
 	current_setting = get_setting('fenlight.%s' % setting_id)
@@ -263,6 +274,7 @@ def default_settings():
 {'setting_id': 'meta_filter', 'setting_type': 'boolean', 'setting_default': 'false'},
 {'setting_id': 'use_viewtypes', 'setting_type': 'boolean', 'setting_default': 'true'},
 {'setting_id': 'manual_viewtypes', 'setting_type': 'boolean', 'setting_default': 'false'},
+{'setting_id': 'view.default', 'setting_type': 'action', 'setting_default': '508', 'settings_options': {'508': 'Fanart (Confluence)', '515': 'Media Info 3 (Confluence)'}},
 {'setting_id': 'view.main', 'setting_type': 'string', 'setting_default': '55'},
 {'setting_id': 'view.movies', 'setting_type': 'string', 'setting_default': '508'},
 {'setting_id': 'view.tvshows', 'setting_type': 'string', 'setting_default': '508'},
@@ -355,6 +367,11 @@ def default_settings():
 #==================== External
 {'setting_id': 'provider.external', 'setting_type': 'boolean', 'setting_default': 'false'},
 {'setting_id': 'external_scraper.name', 'setting_type': 'string', 'setting_default': 'empty_setting'},
+{'setting_id': 'external.preferred_language', 'setting_type': 'action', 'setting_default': 'eng', 'settings_options': {
+'eng': 'English', 'any': 'Any Language', 'ara': 'Arabic', 'ben': 'Bengali', 'chi': 'Chinese', 'dut': 'Dutch', 'fin': 'Finnish',
+'fre': 'French', 'ger': 'German', 'ell': 'Greek', 'heb': 'Hebrew', 'hin': 'Hindi', 'ind': 'Indonesian', 'ita': 'Italian',
+'jpn': 'Japanese', 'kor': 'Korean', 'pol': 'Polish', 'por': 'Portuguese', 'rus': 'Russian', 'spa': 'Spanish', 'swe': 'Swedish',
+'tam': 'Tamil', 'tel': 'Telugu', 'tur': 'Turkish', 'ukr': 'Ukrainian'}},
 {'setting_id': 'external.cache_check', 'setting_type': 'boolean', 'setting_default': 'false'},
 #==================== Real Debrid
 {'setting_id': 'rd.token', 'setting_type': 'string', 'setting_default': 'empty_setting'},

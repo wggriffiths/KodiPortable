@@ -1,3 +1,16 @@
+[COLOR purple][B]Private build 2.2.05.6[/B][/COLOR]
+- Added a Fen Light setting for the preferred external-scraper source
+  language. English remains the default, with Any Language and supported
+  language choices available in the UI for the paired CocoScrapers module.
+- Added friendly Confluence presets for the default video view: Fanart remains
+  the default and Media Info 3 can be selected without entering numeric IDs.
+  The existing manual view IDs and Tools -> Set Views workflow remain
+  available for other skins.
+- External scraper cache keys now include the selected source language so a
+  language change cannot reuse results filtered for a previous choice.
+- The language preference is scoped to the active Fen scrape so it does not
+  leak into another add-on using CocoScrapers in the same Kodi session.
+
 [COLOR purple][B]Private build 2.2.05.5[/B][/COLOR]
 - Fen Light now defaults movie, TV-show, season, and episode containers to the
   Confluence Fanart view instead of Media Info 3.
