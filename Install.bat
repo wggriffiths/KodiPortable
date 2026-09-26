@@ -291,7 +291,7 @@ if exist "%PPATH%set-preferred-audio-language.ps1" (
     echo Warning: set-preferred-audio-language.ps1 was not found.
 )
 
-rem # Keep Fen Light's movie and TV lists on Media Info 3
+rem # Keep Fen Light's movie and TV lists on Fanart
 rem ######################################################
 if exist "%PPATH%set-default-video-view.ps1" (
     copy /Y "%PPATH%set-default-video-view.ps1" "%KODI_ROOT%\set-default-video-view.ps1" > nul || goto :fail
@@ -396,7 +396,7 @@ if not exist "%KODI_ROOT%\set-default-video-view.ps1" (
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%KODI_ROOT%\set-default-video-view.ps1" -KodiRoot "%KODI_ROOT%" >nul 2>&1
 if errorlevel 1 (
-    echo Warning: could not set Fen Light's default video view to Media Info 3.
+    echo Warning: could not set Fen Light's default video view to Fanart.
 )
 EXIT /B 0
 

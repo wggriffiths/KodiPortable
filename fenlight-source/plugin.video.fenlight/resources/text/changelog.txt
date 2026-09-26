@@ -1,3 +1,9 @@
+[COLOR purple][B]Private build 2.2.05.5[/B][/COLOR]
+- Fen Light now defaults movie, TV-show, season, and episode containers to the
+  Confluence Fanart view instead of Media Info 3.
+- Existing Media Info 3 view settings are migrated to Fanart by the installer
+  helper, while manually chosen non-default view settings are preserved.
+
 [COLOR purple][B]Private build 2.2.05.4[/B][/COLOR]
 - New private profiles now enable Fen Light External Scrapers and select the
   paired CocoScrapers module automatically. Existing external-scraper choices

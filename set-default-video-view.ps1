@@ -5,9 +5,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Confluence's Media Info 3 view is view id 515. Fen Light applies these
+# Confluence's Fanart view is view id 508. Fen Light applies these
 # settings when it opens movie, TV-show, season, and episode containers.
-$viewId = '515'
+$viewId = '508'
 $settingIds = @(
     'view.movies',
     'view.tvshows',
@@ -30,7 +30,7 @@ if (-not (Test-Path -LiteralPath $sqlitePath)) {
 }
 
 $addonProfilePath = Split-Path -Parent (Split-Path -Parent $databasePath)
-$backupPath = Join-Path -Path $addonProfilePath -ChildPath 'settings.db.media-info3.bak'
+$backupPath = Join-Path -Path $addonProfilePath -ChildPath 'settings.db.fanart.bak'
 $database = [IntPtr]::Zero
 $exitCode = 0
 
@@ -85,7 +85,7 @@ BEGIN IMMEDIATE;
 UPDATE settings
 SET setting_default = '$viewId',
     setting_value = CASE
-        WHEN setting_value IN ('500', '55') THEN '$viewId'
+        WHEN setting_value IN ('500', '55', '515', '720896') THEN '$viewId'
         ELSE setting_value
     END
 WHERE setting_id IN ($quotedIds);

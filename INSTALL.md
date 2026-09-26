@@ -44,7 +44,7 @@ The current project versions are:
 6. Allow the installer to download and extract Kodi.
 
 The installer then applies the English preferred-audio setting, sets Fen
-Light's default list view to **Media Info 3**, builds the complete Fen Light
+Light's default list view to **Fanart**, builds the complete Fen Light
 and CocoScrapers packages, enables Kodi's **Unknown sources** setting for this
 portable profile, installs the official Python dependencies required by the
 packages, and installs them into the new portable profile. On the first Kodi

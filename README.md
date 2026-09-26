@@ -3,7 +3,7 @@
 Kodi Portable is an unofficial Windows portable Kodi build and add-on
 repository for Kodi Matrix, Nexus, and Omega. It packages an independent Fen
 Light fork with a paired CocoScrapers module, provider updates, English audio
-filtering, playback and shutdown fixes, Media Info 3 defaults, and GitHub
+filtering, playback and shutdown fixes, Fanart view defaults, and GitHub
 Pages delivery.
 
 This project is independent and is not affiliated with Kodi, the original Fen
@@ -122,7 +122,7 @@ The current installed Fen Light add-on is kept as clean source under:
 
 `fenlight-source\plugin.video.fenlight`
 
-The source includes the local Media Info 3 defaults, but does not include Kodi's profile, databases, credentials, logs, or cache files. Run `build-fenlight-package.ps1` to create the ignored package:
+The source includes the local Fanart view defaults, but does not include Kodi's profile, databases, credentials, logs, or cache files. Run `build-fenlight-package.ps1` to create the ignored package:
 
 `packages\plugin.video.fenlight-private.zip`
 
