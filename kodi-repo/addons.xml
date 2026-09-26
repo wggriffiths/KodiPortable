@@ -18,7 +18,7 @@
       <platform>all</platform>
     </extension>
   </addon>
-  <addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.4">
+  <addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.5">
     <requires>
       <import addon="xbmc.python" version="3.0.0" />
       <import addon="script.module.pil" version="1.1.7" />
@@ -40,7 +40,9 @@
         <icon>resources/media/addon_icons/fenlight_icon_01.png</icon>
         <fanart>resources/media/fenlight_fanart_01.jpg</fanart>
       </assets>
-      <news>[B]Private Fen Light build 2.2.05.4 by Tinkerer[/B]
+      <news>[B]Private Fen Light build 2.2.05.5 by Tinkerer[/B]
+- Fen Light now defaults movie, TV-show, season, and episode containers to the Confluence Fanart view.
+- Existing Media Info 3 view settings are migrated to Fanart by the installer helper.
 - New private profiles now default to the paired CocoScrapers module.
 - Deferred Fen's self-restart after metadata changes until the next Kodi launch to avoid service shutdown stalls.
 - Added shutdown checks before custom skin preparation and Trakt network work.
