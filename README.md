@@ -27,8 +27,11 @@ Read these files first:
 - [packages/README.md](packages/README.md) — generated package map.
 
 The normal `Install.bat` path builds from the complete source directories and
-installs the ZIPs in `packages`. It does not use the legacy
-`cocoscrapers-patches` overlay.
+installs the ZIPs in `packages`. It also downloads the official Kodi Python
+dependencies needed by the private packages and installs a one-time Kodi
+startup helper that enables them after a clean direct extraction. The helper
+uses Kodi's bundled Python runtime; a system Python installation is not
+required. It does not use the legacy `cocoscrapers-patches` overlay.
 
 ## Public Kodi repository
 

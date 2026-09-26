@@ -46,7 +46,14 @@ The current published versions are:
 The installer then applies the English preferred-audio setting, sets Fen
 Light's default list view to **Media Info 3**, builds the complete Fen Light
 and CocoScrapers packages, enables Kodi's **Unknown sources** setting for this
-portable profile, and installs them into the new portable profile.
+portable profile, installs the official Python dependencies required by the
+packages, and installs them into the new portable profile. On the first Kodi
+launch, a temporary Kodi service enables the two private add-ons silently and
+then removes itself.
+
+The temporary service runs inside Kodi's bundled Python runtime. Users do not
+need to install Python on Windows, and `Install.bat` does not call a system
+`python.exe`.
 
 Start Kodi with the generated `kodi.app\start-kodi.bat` file, or choose
 **2 - Open Kodi** from the installer menu.
@@ -64,7 +71,8 @@ Start Kodi with the generated `kodi.app\start-kodi.bat` file, or choose
   CocoScrapers only.
 
 Options 6 and 7 require Kodi to be closed. The installer warns and skips the
-package installation if `kodi.exe` is still running.
+package installation if `kodi.exe` is still running. These options also prepare
+the official Python dependencies and first-launch enable helper.
 
 ## Method 2: install from GitHub Pages
 

@@ -157,10 +157,12 @@ cls
 	if "%menu_choice%" == "6" (
         call :install_fenlight_package
 		call :install_cocoscrapers_package
+		call :install_private_addon_support both
 	)
 
 	if "%menu_choice%" == "7" (
 		call :install_cocoscrapers_package
+		call :install_private_addon_support cocoscrapers
 	)
 
 	if "%menu_choice%" == "8" (
@@ -302,6 +304,7 @@ rem # Build/install the tracked private Fen Light package
 rem #####################################################
 call :install_fenlight_package
 call :install_cocoscrapers_package
+call :install_private_addon_support both
 
 :: # Create start-kodi.bat
 :: #########################
@@ -487,6 +490,47 @@ if errorlevel 2 (
 )
 
 echo Installed the complete private CocoScrapers package.
+EXIT /B 0
+
+:: # Install private add-on dependencies and one-time enable helper
+:: #################################################################
+:install_private_addon_support
+set "private_support_targets=%~1"
+if "%private_support_targets%"=="" set "private_support_targets=both"
+
+if /I "%$KCodename%"=="Leia" (
+    echo Warning: private Fen Light and CocoScrapers packages require Kodi Python 3; skipping their startup helper on Leia.
+    EXIT /B 0
+)
+
+if not exist "%KODI_ROOT%\portable_data\addons\plugin.video.fenlight\addon.xml" if not exist "%KODI_ROOT%\portable_data\addons\script.module.cocoscrapers\addon.xml" (
+    echo No private add-ons found; skipping dependency setup.
+    EXIT /B 0
+)
+
+if not exist "%PPATH%install-kodi-dependencies.ps1" (
+    echo Warning: install-kodi-dependencies.ps1 was not found.
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PPATH%install-kodi-dependencies.ps1" -KodiRoot "%KODI_ROOT%" -KodiCodename "%$KCodename%"
+if errorlevel 1 (
+    echo Warning: could not install the official Kodi Python dependencies. Private add-ons may remain disabled.
+    EXIT /B 0
+)
+
+if not exist "%PPATH%install-addon-bootstrap.ps1" (
+    echo Warning: install-addon-bootstrap.ps1 was not found.
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PPATH%install-addon-bootstrap.ps1" -KodiRoot "%KODI_ROOT%" -Targets "%private_support_targets%"
+if errorlevel 1 (
+    echo Warning: could not install the one-time private add-on startup helper.
+    EXIT /B 0
+)
+
+echo Private add-on dependencies and first-start enable helper are ready.
 EXIT /B 0
 
 :: # Set environment Function
