@@ -1,10 +1,19 @@
 # Kodi Portable build
 
-This repository contains the Windows portable Kodi installer, its private
-add-on sources, and the generated packages installed by the setup.
+Kodi Portable is an unofficial Windows portable Kodi build and add-on
+repository for Kodi Matrix, Nexus, and Omega. It packages an independent Fen
+Light fork with a paired CocoScrapers module, provider updates, English audio
+filtering, playback and shutdown fixes, Media Info 3 defaults, and GitHub
+Pages delivery.
+
+This project is independent and is not affiliated with Kodi, the original Fen
+Light or CocoScrapers authors, or any streaming provider. It does not host or
+provide media; use it only with content and services you are authorised to
+access.
 
 Read these files first:
 
+- [INSTALL.md](INSTALL.md) — installation, repository setup, updates, and troubleshooting.
 - [Install.bat](Install.bat) — installer and rebuild workflow.
 - [Install.conf](Install.conf) — local installer configuration and Kodi version choices.
 - [build-kodi-repository.ps1](build-kodi-repository.ps1) — public add-on repository build.
