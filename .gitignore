@@ -2,6 +2,7 @@
 /kodi.app/
 /portable-app/
 /kodi-*.app/
+/Install.conf
 /.kodi*/
 /packages/
 /portable-app/Data/settings/
