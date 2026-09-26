@@ -18,7 +18,7 @@
       <platform>all</platform>
     </extension>
   </addon>
-  <addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.3">
+  <addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.4">
     <requires>
       <import addon="xbmc.python" version="3.0.0" />
       <import addon="script.module.pil" version="1.1.7" />
@@ -40,7 +40,10 @@
         <icon>resources/media/addon_icons/fenlight_icon_01.png</icon>
         <fanart>resources/media/fenlight_fanart_01.jpg</fanart>
       </assets>
-      <news>[B]Private Fen Light build 2.2.05.3 by Tinkerer[/B]
+      <news>[B]Private Fen Light build 2.2.05.4 by Tinkerer[/B]
+- New private profiles now default to the paired CocoScrapers module.
+- Deferred Fen's self-restart after metadata changes until the next Kodi launch to avoid service shutdown stalls.
+- Added shutdown checks before custom skin preparation and Trakt network work.
 - Corrected external-cache reads and expiry deletion.
 - Hardened background workers, playback abort handling, dialogs, and Kodi shutdown.
 - Disabled the retired upstream updater; use KodiPortable Install.bat for updates.
