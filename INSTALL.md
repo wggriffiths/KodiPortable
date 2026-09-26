@@ -24,6 +24,8 @@ The current published versions are:
 
 - Extract or clone the project so that `Install.bat`, `bin`, the source
   folders, and the build scripts are in the same project root.
+- The project root may contain spaces in its folder name (for example,
+  `C:\Users\User\Desktop\Kodi Test\KodiPortable-main`).
 - Keep an internet connection available while Kodi is downloaded.
 - Close every Kodi process before rebuilding or installing an add-on package.
 - If the existing Kodi profile matters, save it before rebuilding.
@@ -43,7 +45,8 @@ The current published versions are:
 
 The installer then applies the English preferred-audio setting, sets Fen
 Light's default list view to **Media Info 3**, builds the complete Fen Light
-and CocoScrapers packages, and installs them into the new portable profile.
+and CocoScrapers packages, enables Kodi's **Unknown sources** setting for this
+portable profile, and installs them into the new portable profile.
 
 Start Kodi with the generated `kodi.app\start-kodi.bat` file, or choose
 **2 - Open Kodi** from the installer menu.
@@ -74,7 +77,10 @@ install Kodi itself; it installs the tracked add-ons through the repository.
 
    `https://wggriffiths.github.io/KodiPortable/repository.tinkerer-1.0.2.zip`
 
-2. In Kodi, enable **Unknown sources** if Kodi asks for permission.
+2. In Kodi, enable **Unknown sources** if Kodi asks for permission. This is
+   still required for an existing clean Kodi profile because this method does
+   not run `Install.bat` and the repository ZIP cannot change Kodi settings
+   before it is installed.
 3. Open **Add-ons â†’ Install from zip file**.
 4. Select the downloaded `repository.tinkerer-1.0.2.zip` file.
 5. Open **Add-ons â†’ Install from repository â†’ Tinkerer Kodi Repository**.

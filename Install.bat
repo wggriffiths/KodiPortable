@@ -61,7 +61,7 @@ echo UAC.ShellExecute "%~s0","%ARGS%", "", "runas", 1 >> "%temp%\getadmin.vbs"
 exit /B
 
 :gotAdmin
-setlocal enabledelayedexpansion & cd /d %~dp0
+setlocal enabledelayedexpansion & cd /d "%~dp0"
 if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
 :: -------------------------------------------------------------------->
 
@@ -128,7 +128,7 @@ cls
         	   goto :topmenu
     		)
 
-		rd /q /s %KODI_ROOT%
+		rd /q /s "%KODI_ROOT%"
 		set $KArchitecture=unset
 		set CPU=unset
 		set $KInstall=0
@@ -137,7 +137,7 @@ cls
 	)
 
 	if "%menu_choice%" == "2" (
-        start /wait %KODI_ROOT%\start-kodi.bat
+		start "" /wait "%KODI_ROOT%\start-kodi.bat"
         timeout /t 1 /nobreak > NUL
 	)
 
@@ -235,40 +235,49 @@ ver > nul
 :: # make errorlevel 0
 :: #############################
 
-if not exist %PPATH%%$file%.nsis (
+if not exist "%PPATH%%$file%.nsis" (
     echo Downloading %$file%.nsis
-    echo %PPATH%bin\wget -q %$sh_url% --show-progress -O %PPATH%%$file%.nsis
-    %PPATH%bin\wget -q %$sh_url% --show-progress -O %PPATH%%$file%.nsis
+    echo "%PPATH%bin\wget.exe" -q "%$sh_url%" --show-progress -O "%PPATH%%$file%.nsis"
+    "%PPATH%bin\wget.exe" -q "%$sh_url%" --show-progress -O "%PPATH%%$file%.nsis"
 )
 
 if %errorlevel% NEQ 0 (
     echo Error downloading file, Error: %errorlevel%
-    del %PPATH%%$file%.nsis
+    del "%PPATH%%$file%.nsis"
     goto :fail
 ) else (
     echo Extracting: [%PPATH%%$file%.nsis]
-    %PPATH%bin\7z.exe x -o"%KODI_ROOT%" %PPATH%%$file%.nsis
+    "%PPATH%bin\7z.exe" x -o"%KODI_ROOT%" "%PPATH%%$file%.nsis"
     
     rem # If backup exists extract portable_data
-    if %$pfile% NEQ "none" (
+    if /I not "%$pfile%"=="none" (
         echo Extracting: Portable Data [%PPATH%%$pfile%]
-    	%PPATH%bin\7z.exe x -o"%KODI_ROOT%" "%PPATH%%$pfile%"
+	    "%PPATH%bin\7z.exe" x -o"%KODI_ROOT%" "%PPATH%%$pfile%"
     )
     
     rem # Install Microsoft Visual C++ (x%CPU%) Redistributable
     rem ###################################################
     echo Installing: Microsoft Visual C++ ^(x%CPU%^) Redistributable
-    if exist %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe (
-        start /wait %KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe /s
+    if exist "%KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe" (
+        start "" /wait "%KODI_ROOT%\$TEMP\%Redistributable%\vcredist_x%CPU%.exe" /s
         timeout /t 4
     )
 
     rem # remove unwanted directories and files
-    rd /q /s %KODI_ROOT%\$TEMP
-    rd /q /s %KODI_ROOT%\$PLUGINSDIR
-    del /q %KODI_ROOT%\Uninstall.exe
+    rd /q /s "%KODI_ROOT%\$TEMP"
+    rd /q /s "%KODI_ROOT%\$PLUGINSDIR"
+    del /q "%KODI_ROOT%\Uninstall.exe"
 	set $KInstall=1
     echo.
+)
+
+rem # Allow the private repository ZIP to be installed in this profile
+rem ##################################################################
+if exist "%PPATH%set-allow-unknown-sources.ps1" (
+    copy /Y "%PPATH%set-allow-unknown-sources.ps1" "%KODI_ROOT%\set-allow-unknown-sources.ps1" > nul || goto :fail
+    call :set_allow_unknown_sources
+) else (
+    echo Warning: set-allow-unknown-sources.ps1 was not found.
 )
 
 rem # Keep Kodi's preferred audio track language set to English
@@ -304,7 +313,7 @@ echo Creating [%start_kodi%]...
   echo.
   echo pushd "%%CD%%"
   echo CD /D "%%~dp0"
-  echo set PPATH=%%~dp0
+  echo set "PPATH=%%~dp0"
   echo.
   echo if exist "%%~dp0set-preferred-audio-language.ps1" ^(
   echo     powershell -NoProfile -ExecutionPolicy Bypass -File "%%~dp0set-preferred-audio-language.ps1" -KodiRoot "%%~dp0" ^>nul 2^>^&1
@@ -315,7 +324,7 @@ echo Creating [%start_kodi%]...
   echo if exist "%%DESKTOP_PATH%%\Kodi.lnk" (
   echo     :start_kodi
   echo     echo starting kodi
-  echo     start "Kodi Portable" kodi.exe -p
+  echo     start "Kodi Portable" "%%~dp0kodi.exe" -p
   echo     goto eof
   echo ^)
   echo.
@@ -359,6 +368,19 @@ if not exist "%KODI_ROOT%\set-preferred-audio-language.ps1" (
 powershell -NoProfile -ExecutionPolicy Bypass -File "%KODI_ROOT%\set-preferred-audio-language.ps1" -KodiRoot "%KODI_ROOT%" >nul 2>&1
 if errorlevel 1 (
     echo Warning: could not set Kodi's preferred audio language to English.
+)
+EXIT /B 0
+
+:: # Allow the private repository ZIP to be installed in this portable profile
+:: ###########################################################################
+:set_allow_unknown_sources
+if not exist "%KODI_ROOT%\set-allow-unknown-sources.ps1" (
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%KODI_ROOT%\set-allow-unknown-sources.ps1" -KodiRoot "%KODI_ROOT%" >nul 2>&1
+if errorlevel 1 (
+    echo Warning: could not enable Kodi's Unknown sources setting.
 )
 EXIT /B 0
 
@@ -530,7 +552,7 @@ set "fileCount=0"
 dir /b /a-d "%PPATH%%searchPattern%" >nul 2>&1
 if errorlevel 1 (
     echo No files found matching "%PPATH%%searchPattern%"
-	set pfile="none"
+	set pfile=none
 	EXIT /B 0
 )
 
@@ -551,7 +573,7 @@ set /p "choice=Enter the number of the file to restore (or press Enter to cancel
 
 :: Check if the user pressed Enter without input
 if "%choice%"=="" (
-    set pfile="none"
+	set pfile=none
 	EXIT /B 0
 )
 
@@ -634,14 +656,14 @@ EXIT /B 0
 cls
 color 0F
 
-set PPATH=%~dp0
+set "PPATH=%~dp0"
 echo Loading config: [%~n0.conf]
-if not exist %PPATH%%~n0.conf (
+if not exist "%PPATH%%~n0.conf" (
     echo Config not found.
     call :config_defaults
 )
 
-for /f "tokens=1,2 delims== eol=#" %%a in (%PPATH%%~n0.conf) do (
+for /f "usebackq tokens=1,2 delims== eol=#" %%a in ("%PPATH%%~n0.conf") do (
     rem # set env for each line, set <name>=<value>
     echo %%a: %%b	
     set %%a=%%b
@@ -650,7 +672,7 @@ for /f "tokens=1,2 delims== eol=#" %%a in (%PPATH%%~n0.conf) do (
 if %$KArchitecture%==64 (set CPU=64)
 if %$KArchitecture%==32 (set CPU=86)
 
-set KODI_ROOT=%PPATH%%$KInstallDir%
+set "KODI_ROOT=%PPATH%%$KInstallDir%"
 timeout /t 1 /nobreak > NUL
 EXIT /B 0
 
@@ -677,7 +699,7 @@ set $pfile=0
 :: # Save configuration
 :: ######################
 :save_config
-if exist %PPATH%%~n0.conf (del %PPATH%%~n0.conf)
+if exist "%PPATH%%~n0.conf" (del "%PPATH%%~n0.conf")
 set "kodi_config=%PPATH%%~n0.conf"
 echo Saving config: [%~n0.conf]
 (
@@ -811,12 +833,12 @@ if "%errorlevel%" NEQ "0" (
     ) > "%advancedsettingsxml%" || goto :fail
 )
 
-start %KODI_ROOT%\start-kodi.bat
+start "" "%KODI_ROOT%\start-kodi.bat"
 
 set filename=*.log
 set curfiletime=0
 
-cd %KODI_ROOT%\portable_data
+cd /d "%KODI_ROOT%\portable_data"
 
 :checkfiletime
 for /f %%i in ('"forfiles /m %filename% /c "cmd /c echo @ftime" "') do set modif_time=%%i
@@ -831,8 +853,8 @@ timeout /T 1 > nul
 goto :checkfiletime
 
 :loadkodilog
-start  "LOGLEVEL: %kLoglevel% [CTRL+C to Exit]" %PPATH%bin\tail -f %KODI_ROOT%\portable_data\kodi.log
-if exist %KODI_ROOT%\portable_data\userdata\advancedsettings.xml (del %KODI_ROOT%\portable_data\userdata\advancedsettings.xml)
+start  "LOGLEVEL: %kLoglevel% [CTRL+C to Exit]" "%PPATH%bin\tail.exe" -f "%KODI_ROOT%\portable_data\kodi.log"
+if exist "%KODI_ROOT%\portable_data\userdata\advancedsettings.xml" (del "%KODI_ROOT%\portable_data\userdata\advancedsettings.xml")
 exit /B 0
 
 :: # Get PID function.
