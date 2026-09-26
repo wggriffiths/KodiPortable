@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.tinkerer" name="Tinkerer Kodi Repository" version="1.0.1" provider-name="Tinkerer">
+    <requires>
+        <import addon="xbmc.addon" version="12.0.0"/>
+    </requires>
+    <extension point="xbmc.addon.repository" name="Tinkerer Kodi Repository">
+        <dir>
+            <info compressed="false">https://wggriffiths.github.io/KodiPortable/addons.xml</info>
+            <checksum>https://wggriffiths.github.io/KodiPortable/addons.xml.md5</checksum>
+            <datadir zip="true">https://wggriffiths.github.io/KodiPortable/zips/</datadir>
+            <hashes>false</hashes>
+        </dir>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_GB">Tinkerer private Kodi add-on builds.</summary>
+        <description lang="en_GB">Installs the tracked Fen Light and CocoScrapers packages built from the KodiPortable source repository.</description>
+        <platform>all</platform>
+    </extension>
+</addon>

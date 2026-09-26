@@ -1,0 +1,3 @@
+This private Fen Light fork is updated by the KodiPortable installer.
+
+Run Install.bat from the KodiPortable project and choose the private Fen Light package option. The installer builds the tracked source and installs it locally, so this fork does not contact the retired upstream update feed.

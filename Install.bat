@@ -108,15 +108,26 @@ cls
 	echo   1^) Rebuild ^(this will delete the current build^)
 	echo   2^) Open Kodi
     echo   3^) Open Kodi (debug kodi.log)
-	echo   4^) Save 'Portable_data'
+    echo   4^) Save 'Portable_data'
     echo   5^) Create Portable App ^(PortableApps.com^)
+    echo   6^) Build/install private Fen Light package
+    echo   7^) Build/install private CocoScrapers package
 	echo   x^) Exit 
 	echo. 
 	echo. 
-	choice /C 12345x /N /M "Choose an option: "
+	choice /C 1234567x /N /M "Choose an option: "
 	echo.
+	set "menu_choice=%errorlevel%"
 
-	if "%errorlevel%" == "1" (
+	if "%menu_choice%" == "1" (
+		echo.
+    		set /p "confirm=Are you sure you want to rebuild and delete the current build? (Y/N): "
+    		if /i not "%confirm%"=="Y" (
+        	   echo Rebuild cancelled.
+        	   timeout /t 2 > nul
+        	   goto :topmenu
+    		)
+
 		rd /q /s %KODI_ROOT%
 		set $KArchitecture=unset
 		set CPU=unset
@@ -125,25 +136,34 @@ cls
         EXIT /B 0
 	)
 
-	if "%errorlevel%" == "2" (
+	if "%menu_choice%" == "2" (
         start /wait %KODI_ROOT%\start-kodi.bat
         timeout /t 1 /nobreak > NUL
 	)
 
-	if "%errorlevel%" == "3" (
+	if "%menu_choice%" == "3" (
         call :kdebugkodilog
 	)
 
-	if "%errorlevel%" == "4" (
+	if "%menu_choice%" == "4" (
         call :save_portabledata
         ver > nul
 	)
 
-	if "%errorlevel%" == "5" (
+	if "%menu_choice%" == "5" (
         call :create_papp
 	)
 
-	if "%errorlevel%" == "6" (
+	if "%menu_choice%" == "6" (
+        call :install_fenlight_package
+		call :install_cocoscrapers_package
+	)
+
+	if "%menu_choice%" == "7" (
+		call :install_cocoscrapers_package
+	)
+
+	if "%menu_choice%" == "8" (
         set ExitMenu=1
         goto :exitmenu
 	)
@@ -251,6 +271,29 @@ if %errorlevel% NEQ 0 (
     echo.
 )
 
+rem # Keep Kodi's preferred audio track language set to English
+rem ############################################################
+if exist "%PPATH%set-preferred-audio-language.ps1" (
+    copy /Y "%PPATH%set-preferred-audio-language.ps1" "%KODI_ROOT%\set-preferred-audio-language.ps1" > nul || goto :fail
+    call :set_default_audio_language
+) else (
+    echo Warning: set-preferred-audio-language.ps1 was not found.
+)
+
+rem # Keep Fen Light's movie and TV lists on Media Info 3
+rem ######################################################
+if exist "%PPATH%set-default-video-view.ps1" (
+    copy /Y "%PPATH%set-default-video-view.ps1" "%KODI_ROOT%\set-default-video-view.ps1" > nul || goto :fail
+    call :set_default_video_view
+) else (
+    echo Warning: set-default-video-view.ps1 was not found.
+)
+
+rem # Build/install the tracked private Fen Light package
+rem #####################################################
+call :install_fenlight_package
+call :install_cocoscrapers_package
+
 :: # Create start-kodi.bat
 :: #########################
 set "start_kodi=%KODI_ROOT%\start-kodi.bat"
@@ -262,6 +305,10 @@ echo Creating [%start_kodi%]...
   echo pushd "%%CD%%"
   echo CD /D "%%~dp0"
   echo set PPATH=%%~dp0
+  echo.
+  echo if exist "%%~dp0set-preferred-audio-language.ps1" ^(
+  echo     powershell -NoProfile -ExecutionPolicy Bypass -File "%%~dp0set-preferred-audio-language.ps1" -KodiRoot "%%~dp0" ^>nul 2^>^&1
+  echo ^)
   echo.
   echo for /f "tokens=*" %%%%i in ^('powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"'^) do set DESKTOP_PATH=%%%%i
   echo.
@@ -289,6 +336,7 @@ echo Creating [%start_kodi%]...
   echo exit
 ) > "%start_kodi%" || goto :fail
 
+
 echo *-------------------------------------------------------------*
 echo * Kodi Portable Installation Complete..                       *
 echo *-------------------------------------------------------------*
@@ -299,6 +347,124 @@ echo ***************************************************************
 echo.
 timeout /t 8
 call :save_config
+EXIT /B 0
+
+:: # Apply the preferred audio language to the portable profile
+:: ############################################################
+:set_default_audio_language
+if not exist "%KODI_ROOT%\set-preferred-audio-language.ps1" (
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%KODI_ROOT%\set-preferred-audio-language.ps1" -KodiRoot "%KODI_ROOT%" >nul 2>&1
+if errorlevel 1 (
+    echo Warning: could not set Kodi's preferred audio language to English.
+)
+EXIT /B 0
+
+:: # Apply the default Fen Light video view
+:: ########################################
+:set_default_video_view
+if not exist "%KODI_ROOT%\set-default-video-view.ps1" (
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%KODI_ROOT%\set-default-video-view.ps1" -KodiRoot "%KODI_ROOT%" >nul 2>&1
+if errorlevel 1 (
+    echo Warning: could not set Fen Light's default video view to Media Info 3.
+)
+EXIT /B 0
+
+:: # Build and install the tracked private Fen Light package
+:: #########################################################
+:install_fenlight_package
+if not exist "%PPATH%fenlight-source\plugin.video.fenlight\addon.xml" (
+    echo Private Fen Light source not found; skipping package install.
+    EXIT /B 0
+)
+
+tasklist /FI "IMAGENAME eq kodi.exe" 2>NUL | find /I "kodi.exe" >NUL
+if not errorlevel 1 (
+    echo Warning: close Kodi before installing the private Fen Light package.
+    EXIT /B 0
+)
+
+if not exist "%PPATH%build-fenlight-package.ps1" (
+    echo Warning: build-fenlight-package.ps1 was not found.
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PPATH%build-fenlight-package.ps1" -SourceRoot "%PPATH%fenlight-source\plugin.video.fenlight" -OutputDirectory "%PPATH%packages"
+if errorlevel 1 (
+    echo Warning: could not build the private Fen Light package.
+    EXIT /B 0
+)
+
+if not exist "%PPATH%packages\plugin.video.fenlight-private.zip" (
+    echo Warning: the private Fen Light package was not created.
+    EXIT /B 0
+)
+
+if not exist "%KODI_ROOT%\portable_data\addons" (
+    md "%KODI_ROOT%\portable_data\addons"
+)
+
+if exist "%KODI_ROOT%\portable_data\addons\plugin.video.fenlight" (
+    rd /q /s "%KODI_ROOT%\portable_data\addons\plugin.video.fenlight"
+)
+
+"%PPATH%bin\7z.exe" x -aoa -o"%KODI_ROOT%\portable_data\addons" "%PPATH%packages\plugin.video.fenlight-private.zip" >nul
+if errorlevel 2 (
+    echo Warning: could not install the private Fen Light package.
+    EXIT /B 0
+)
+
+echo Installed the private Fen Light package.
+EXIT /B 0
+
+:install_cocoscrapers_package
+if not exist "%PPATH%build-cocoscrapers-package.ps1" (
+    echo Warning: build-cocoscrapers-package.ps1 was not found.
+    EXIT /B 0
+)
+
+if not exist "%PPATH%cocoscrapers-source\script.module.cocoscrapers\addon.xml" (
+    echo Warning: complete CocoScrapers source was not found.
+    EXIT /B 0
+)
+
+tasklist /FI "IMAGENAME eq kodi.exe" 2>NUL | find /I "kodi.exe" >NUL
+if not errorlevel 1 (
+    echo Warning: close Kodi before installing the complete CocoScrapers package.
+    EXIT /B 0
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PPATH%build-cocoscrapers-package.ps1" -SourceRoot "%PPATH%cocoscrapers-source\script.module.cocoscrapers" -OutputDirectory "%PPATH%packages"
+if errorlevel 1 (
+    echo Warning: could not build the complete CocoScrapers package.
+    EXIT /B 0
+)
+
+if not exist "%PPATH%packages\script.module.cocoscrapers-private.zip" (
+    echo Warning: the complete CocoScrapers package was not created.
+    EXIT /B 0
+)
+
+if not exist "%KODI_ROOT%\portable_data\addons" (
+    md "%KODI_ROOT%\portable_data\addons"
+)
+
+if exist "%KODI_ROOT%\portable_data\addons\script.module.cocoscrapers" (
+    rd /q /s "%KODI_ROOT%\portable_data\addons\script.module.cocoscrapers"
+)
+
+"%PPATH%bin\7z.exe" x -aoa -o"%KODI_ROOT%\portable_data\addons" "%PPATH%packages\script.module.cocoscrapers-private.zip" >nul
+if errorlevel 2 (
+    echo Warning: could not install the complete CocoScrapers package.
+    EXIT /B 0
+)
+
+echo Installed the complete private CocoScrapers package.
 EXIT /B 0
 
 :: # Set environment Function

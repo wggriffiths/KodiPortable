@@ -1,0 +1,35 @@
+# Generated Kodi installations and portable profiles
+/kodi.app/
+/portable-app/
+/kodi-*.app/
+/.kodi*/
+/packages/
+/portable-app/Data/settings/
+**/pac_installer_log.ini
+
+# Local-only agent instructions and build leftovers
+/AGENTS.md
+/fenlight-source/packages/
+# Keep the package-area documentation while ignoring generated ZIP files.
+!/packages/
+/packages/*
+!/packages/README.md
+
+# Downloaded/build snapshots (keep the installer source small)
+*.nsis
+*.tar
+*.log
+*.log.*
+
+# Runtime data and credentials, wherever they are copied
+**/addon_data/
+**/userdata/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Local editor and temporary files
+.vscode/
+.idea/
+*.tmp
+*.bak

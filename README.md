@@ -1,4 +1,38 @@
-<img width="713" height="459" alt="image" src="https://github.com/user-attachments/assets/0d39b761-bdf5-4faa-b43b-df97836496bf" />
+# Kodi Portable build
+
+This repository contains the Windows portable Kodi installer, its private
+add-on sources, and the generated packages installed by the setup.
+
+Read these files first:
+
+- [AGENTS.md](AGENTS.md) — source-of-truth rules and change workflow.
+- [cocoscrapers-source/README.md](cocoscrapers-source/README.md) — complete
+  CocoScrapers package source.
+- [cocoscrapers-patches/README.md](cocoscrapers-patches/README.md) — legacy
+  partial overlay and limitations.
+- [fenlight-source/README.md](fenlight-source/README.md) — complete Fen Light
+  fork source.
+- [packages/README.md](packages/README.md) — generated package map.
+
+The normal `Install.bat` path builds from the complete source directories and
+installs the ZIPs in `packages`. It does not use the legacy
+`cocoscrapers-patches` overlay.
+
+## Public Kodi repository
+
+This project also publishes a Kodi repository through GitHub Pages at:
+
+`https://wggriffiths.github.io/KodiPortable/`
+
+Run `build-kodi-repository.ps1` after source changes. It rebuilds the tracked
+Fen Light and CocoScrapers packages, creates the `repository.tinkerer` ZIP,
+and regenerates the Kodi repository index and checksum. The GitHub Actions
+workflow repeats this build and commits the generated `kodi-repo` output when
+changes are pushed to `main`.
+
+Install `kodi-repo\repository.tinkerer-1.0.1.zip`
+once in Kodi with **Install from zip file**. Later add-on versions can then be
+installed from Tinkerer Kodi Repository.
 
 ## Script Overview
 
@@ -47,3 +81,35 @@ The Kodi Portable Installer is designed to install and manage portable versions 
 
 This structure allows the script to be modular, making it easier to maintain and extend with additional features in the future.
 
+## Private Fen Light source and package
+
+The current installed Fen Light add-on is kept as clean source under:
+
+`fenlight-source\plugin.video.fenlight`
+
+The source includes the local Media Info 3 defaults, but does not include Kodi's profile, databases, credentials, logs, or cache files. Run `build-fenlight-package.ps1` to create the ignored package:
+
+`packages\plugin.video.fenlight-private.zip`
+
+`Install.bat` builds and installs that package automatically after a Kodi rebuild. From its main menu, option 6 rebuilds and installs it on demand. The ZIP has the normal Kodi add-on layout, so it can also be installed through Kodi's Add-on manager using **Install from zip file**.
+
+## Private CocoScrapers source and package
+
+The complete CocoScrapers 1.0.32 base is kept as source under:
+
+`cocoscrapers-source\script.module.cocoscrapers`
+
+The local performance changes and additional provider modules are merged into
+that source. Run `build-cocoscrapers-package.ps1` to create the ignored package:
+
+`packages\script.module.cocoscrapers-private.zip`
+
+`Install.bat` builds and installs this complete package automatically after a
+Kodi rebuild. The existing `install-cocoscrapers-patch.ps1` remains available
+as a legacy overlay fallback; it is no longer the normal installation path.
+
+## Git tracking
+
+The repository tracks the installer, helper scripts, package source, and 7-Zip tools. The live `kodi.app` profile, generated portable app, large Kodi archives, logs, package ZIPs, and runtime data are ignored by `.gitignore`.
+
+The public GitHub remote is `https://github.com/wggriffiths/KodiPortable.git`.

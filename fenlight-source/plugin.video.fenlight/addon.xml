@@ -1,0 +1,35 @@
+<addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.3">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.pil" version="1.1.7"/>
+        <import addon="script.module.requests" version="2.19.1"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="resources/lib/fenlight.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.service" library="resources/lib/service.py"/>
+    <extension point="xbmc.python.module" library="resources/lib/"/>
+    <extension point="xbmc.addon.metadata">
+        <reuselanguageinvoker>true</reuselanguageinvoker>
+        <summary lang="en">Access your content from Easynews and Debrid Clouds.</summary>
+        <description lang="en">This add-on is intended for advanced Kodi users only. You must own the content of any media you play through this addon. This is an English language only add-on.</description>
+        <platform>all</platform>
+		<disclaimer lang="en">The author of this addon does not host any of the content which is found and has no affiliation with any of the content providers.</disclaimer>
+        <license/>
+        <assets>
+            <icon>resources/media/addon_icons/fenlight_icon_01.png</icon>
+            <fanart>resources/media/fenlight_fanart_01.jpg</fanart>
+        </assets>
+        <news>[B]Private Fen Light build 2.2.05.3 by Tinkerer[/B]
+- Corrected external-cache reads and expiry deletion.
+- Hardened background workers, playback abort handling, dialogs, and Kodi shutdown.
+- Disabled the retired upstream updater; use KodiPortable Install.bat for updates.
+- Kept Kodi's reusable language invoker enabled for playback stability.
+- Paired CocoScrapers 1.0.32.2 with English stream filtering and updated providers.
+- Restored Bitsearch, EZTV, TorrentQuest, Rutor, and ShowRSS as enabled providers.
+- Premiumize selection, resolution, and API behavior were not changed.
+
+See Changelog in Tools for the complete private-build details.
+        </news>
+    </extension>
+</addon>
