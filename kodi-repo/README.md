@@ -17,7 +17,7 @@ The GitHub Pages repository URL is:
 
 `https://wggriffiths.github.io/KodiPortable/`
 
-Install `repository.tinkerer-1.0.1.zip` once through
+Install `repository.tinkerer-1.0.2.zip` once through
 Kodi's **Install from zip file** menu. After that, Kodi can discover updates
 from this repository.
 

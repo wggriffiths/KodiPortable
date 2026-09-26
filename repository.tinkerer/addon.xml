@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="repository.tinkerer" name="Tinkerer Kodi Repository" version="1.0.1" provider-name="Tinkerer">
+<addon id="repository.tinkerer" name="Tinkerer Kodi Repository" version="1.0.2" provider-name="Tinkerer">
     <requires>
         <import addon="xbmc.addon" version="12.0.0"/>
     </requires>
     <extension point="xbmc.addon.repository" name="Tinkerer Kodi Repository">
         <dir>
             <info compressed="false">https://wggriffiths.github.io/KodiPortable/addons.xml</info>
-            <checksum>https://wggriffiths.github.io/KodiPortable/addons.xml.md5</checksum>
+            <checksum>https://raw.githubusercontent.com/wggriffiths/KodiPortable/main/kodi-repo/addons.xml.md5</checksum>
             <datadir zip="true">https://wggriffiths.github.io/KodiPortable/zips/</datadir>
             <hashes>false</hashes>
         </dir>

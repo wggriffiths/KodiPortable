@@ -133,6 +133,25 @@ foreach ($manifest in @($repositoryManifest, $fenManifest, $cocoManifest)) {
 
 $addonsXmlPath = Join-Path $RepositoryOutputDirectory 'addons.xml'
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+$repositoryPackageName = ([string]$repositoryManifest.addon.id) + '-' + ([string]$repositoryManifest.addon.version) + '.zip'
+$indexHtmlPath = Join-Path $RepositoryOutputDirectory 'index.html'
+$indexHtml = @"
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tinkerer Kodi Repository</title>
+</head>
+<body>
+  <h1>Tinkerer Kodi Repository</h1>
+  <p>Install this repository in Kodi:</p>
+  <p><a href="$repositoryPackageName">$repositoryPackageName</a></p>
+</body>
+</html>
+"@
+[System.IO.File]::WriteAllText($indexHtmlPath, $indexHtml, $utf8NoBom)
+
 $writerSettings = New-Object System.Xml.XmlWriterSettings
 $writerSettings.Indent = $true
 $writerSettings.Encoding = $utf8NoBom

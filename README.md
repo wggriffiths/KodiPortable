@@ -33,7 +33,7 @@ and regenerates the Kodi repository index and checksum. The GitHub Actions
 workflow repeats this build and commits the generated `kodi-repo` output when
 changes are pushed to `main`.
 
-Install `kodi-repo\repository.tinkerer-1.0.1.zip`
+Install `kodi-repo\repository.tinkerer-1.0.2.zip`
 once in Kodi with **Install from zip file**. Later add-on versions can then be
 installed from Tinkerer Kodi Repository.
 
