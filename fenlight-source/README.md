@@ -4,7 +4,7 @@ This directory contains the complete Fen Light add-on source used by the
 private package installed by this repository.
 
 - Add-on ID: `plugin.video.fenlight`
-- Current local version: `2.2.05.6`
+- Current local version: `2.2.05.12`
 - Package: `..\packages\plugin.video.fenlight-private.zip`
 - Changelog: `plugin.video.fenlight\resources\text\changelog.txt`
 
@@ -19,13 +19,14 @@ There is no separate Fen Light patch overlay. Do not patch only the live
 
 ## Local changes currently included
 
-The fork contains the local language/audio behavior, selectable external
-scraper source languages, selectable Confluence video-view presets with
-Fanart as the default,
-playback and shutdown hardening, and the disabled upstream updater. The
-Premiumize-specific behavior was left outside the requested changes.
+The fork contains local language/audio behavior, selectable external-scraper
+source languages, a skin-aware video-view selector with Fanart as the default,
+playback and shutdown hardening, Trakt rate-limit handling, and the disabled
+upstream updater. Language selection is passed to CocoScrapers in a per-thread
+context so delayed background results use the same preference without a shared
+window-property race. Premiumize-specific logic is unchanged.
 
-The source manifest uses `2.2.05.6`, incrementing the upstream `2.2.05`
+The source manifest uses `2.2.05.12`, incrementing the upstream `2.2.05`
 version for this private patch release. The private package name also
 distinguishes this locally built package from an upstream download.
 

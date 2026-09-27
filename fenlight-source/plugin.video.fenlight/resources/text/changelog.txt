@@ -1,3 +1,40 @@
+[COLOR purple][B]Private build 2.2.05.12[/B][/COLOR]
+- Scope the selected source language to each CocoScrapers provider thread so
+  delayed and background results remain filtered without shared window state.
+- Run the legacy Fanart view migration once so later per-content view choices
+  are not reset on every Kodi startup.
+- Limit automatic Trakt rate-limit retries to Retry-After values of 10 seconds
+  or less. Longer waits return the rate-limit response without blocking Kodi.
+
+[COLOR purple][B]Private build 2.2.05.11[/B][/COLOR]
+- Replaced the broken page-switching view chooser with a selection dialog that
+  stays inside Fen Light settings.
+- The view list is populated from the active skin's declared video views,
+  using skin-localized names and showing each view ID.
+- Selecting a view applies it as Fen Light's default for movies, TV shows,
+  seasons, and episodes.
+
+[COLOR purple][B]Private build 2.2.05.10[/B][/COLOR]
+- Added an initial skin-aware chooser that opened the Kodi video browser. It
+  was replaced by the in-settings selector in 2.2.05.11.
+
+[COLOR purple][B]Private build 2.2.05.9[/B][/COLOR]
+- Simplified the Confluence default-view preset labels to Fanart and Media
+  Info 3. Skin-specific view selection is handled by the 2.2.05.11 chooser.
+
+[COLOR purple][B]Private build 2.2.05.8[/B][/COLOR]
+- Added a Fen startup migration for repository-installed updates: saved view
+  values that still match the old Media Info 3 default are changed to Fanart.
+- The migration was made one-time in 2.2.05.12 to prevent later view choices
+  from being reset at every startup.
+
+[COLOR purple][B]Private build 2.2.05.7[/B][/COLOR]
+- Fixed Trakt rate-limit retries by parsing Retry-After values safely as
+  milliseconds, including HTTP-date values, and retaining the original API
+  request headers when retrying.
+- Missing or malformed Retry-After values now leave the rate-limited response
+  intact instead of crashing the Trakt request.
+
 [COLOR purple][B]Private build 2.2.05.6[/B][/COLOR]
 - Added a Fen Light setting for the preferred external-scraper source
   language. English remains the default, with Any Language and supported
@@ -8,8 +45,8 @@
   available for other skins.
 - External scraper cache keys now include the selected source language so a
   language change cannot reuse results filtered for a previous choice.
-- The language preference is scoped to the active Fen scrape so it does not
-  leak into another add-on using CocoScrapers in the same Kodi session.
+- The language preference is applied only to Fen's individual CocoScrapers
+  provider calls, without changing filtering for other add-ons.
 
 [COLOR purple][B]Private build 2.2.05.5[/B][/COLOR]
 - Fen Light now defaults movie, TV-show, season, and episode containers to the

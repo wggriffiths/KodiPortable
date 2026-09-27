@@ -2,7 +2,8 @@
 import time
 import json
 import random
-from threading import Thread
+import uuid
+from threading import Lock, Thread
 from caches.external_cache import external_cache
 from caches.settings_cache import get_setting
 from modules import kodi_utils, source_utils
@@ -27,6 +28,9 @@ class source:
 		self.processed_prescrape, self.threads_completed = False, False
 		self.timeout = 60 if disabled_ext_ignored else int(get_setting('fenlight.results.timeout', '20'))
 		self.preferred_language = get_setting('fenlight.external.preferred_language', 'eng') or 'eng'
+		self.legacy_language_filter_lock = Lock()
+		self.legacy_language_filter_users = 0
+		self.legacy_language_filter_token = uuid.uuid4().hex
 		self.sources_total = self.sources_4k = self.sources_1080p = self.sources_720p = self.sources_sd = 0
 		self.final_total = self.final_4k = self.final_1080p = self.final_720p = self.final_sd = 0
 		self.count_tuple = (('sources_4k', '4K', self._quality_length), ('sources_1080p', '1080p', self._quality_length), ('sources_720p', '720p', self._quality_length),
@@ -56,10 +60,45 @@ class source:
 							'title': ep_name, 'season': str(self.season), 'episode': str(self.episode), 'preferred_language': self.preferred_language}
 			self.cache_title = '%s|preferred_language:%s' % (self.title, self.preferred_language)
 		except: return []
-		kodi_utils.set_property('fenlight.external.language_filter_active', 'true')
-		kodi_utils.set_property('fenlight.external.preferred_language', self.preferred_language)
-		try: return self.get_sources()
-		finally: kodi_utils.clear_property('fenlight.external.language_filter_active')
+		return self.get_sources()
+
+	def _run_external_source(self, module, method, *args, **kwargs):
+		# CocoScrapers reads this thread-local value while parsing release names.
+		# Keeping it local to this provider call makes delayed/background results
+		# reliable without exposing one Fen search's language to other add-ons.
+		coco_source_utils = None
+		legacy_language_filter = False
+		if get_setting('fenlight.external_scraper.module') == 'script.module.cocoscrapers':
+			try:
+				from cocoscrapers.modules import source_utils as coco_source_utils
+				if hasattr(coco_source_utils, 'set_preferred_language'):
+					coco_source_utils.set_preferred_language(self.preferred_language)
+				else:
+					self._acquire_legacy_language_filter()
+					legacy_language_filter = True
+			except: coco_source_utils = None
+		try: return getattr(module(), method)(*args, **kwargs)
+		finally:
+			if coco_source_utils:
+				if legacy_language_filter: self._release_legacy_language_filter()
+				else: coco_source_utils.clear_preferred_language()
+
+	def _acquire_legacy_language_filter(self):
+		with self.legacy_language_filter_lock:
+			if self.legacy_language_filter_users == 0:
+				kodi_utils.set_property('fenlight.external.preferred_language', self.preferred_language)
+				kodi_utils.set_property('fenlight.external.language_filter_token', self.legacy_language_filter_token)
+				kodi_utils.set_property('fenlight.external.language_filter_active', 'true')
+			self.legacy_language_filter_users += 1
+
+	def _release_legacy_language_filter(self):
+		with self.legacy_language_filter_lock:
+			self.legacy_language_filter_users = max(0, self.legacy_language_filter_users - 1)
+			if self.legacy_language_filter_users: return
+			if kodi_utils.get_property('fenlight.external.language_filter_token') != self.legacy_language_filter_token: return
+			kodi_utils.clear_property('fenlight.external.language_filter_active')
+			kodi_utils.clear_property('fenlight.external.preferred_language')
+			kodi_utils.clear_property('fenlight.external.language_filter_token')
 
 	def get_sources(self):
 		def _scraperDialog():
@@ -133,7 +172,7 @@ class source:
 	def get_movie_source(self, provider, module):
 		sources = external_cache.get(provider, self.media_type, self.tmdb_id, self.cache_title, self.year, '', '')
 		if sources == None:
-			sources = module().sources(self.data, self.host_dict)			
+			sources = self._run_external_source(module, 'sources', self.data, self.host_dict)
 			sources = self.process_sources(provider, sources)
 			if not sources: expiry_hours = 1
 			else: expiry_hours = self.single_expiry
@@ -153,13 +192,13 @@ class source:
 		if sources == None:
 			if pack == 'Show':
 				expiry_hours = self.show_expiry
-				sources = module().sources_packs(self.data, self.host_dict, search_series=True, total_seasons=self.total_seasons)
+				sources = self._run_external_source(module, 'sources_packs', self.data, self.host_dict, search_series=True, total_seasons=self.total_seasons)
 			elif pack == 'Season':
 				expiry_hours = self.season_expiry
-				sources = module().sources_packs(self.data, self.host_dict)
+				sources = self._run_external_source(module, 'sources_packs', self.data, self.host_dict)
 			else:
 				expiry_hours = self.single_expiry
-				sources = module().sources(self.data, self.host_dict)
+				sources = self._run_external_source(module, 'sources', self.data, self.host_dict)
 			sources = self.process_sources(provider, sources)
 			if not sources: expiry_hours = 1
 			external_cache.set(provider, self.media_type, self.tmdb_id, self.cache_title, self.year, s_check, e_check, sources, expiry_hours)

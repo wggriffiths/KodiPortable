@@ -18,7 +18,7 @@
       <platform>all</platform>
     </extension>
   </addon>
-  <addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.6">
+  <addon id="plugin.video.fenlight" name="Fen Light" provider-name="Tinkerer" version="2.2.05.12">
     <requires>
       <import addon="xbmc.python" version="3.0.0" />
       <import addon="script.module.pil" version="1.1.7" />
@@ -40,7 +40,17 @@
         <icon>resources/media/addon_icons/fenlight_icon_01.png</icon>
         <fanart>resources/media/fenlight_fanart_01.jpg</fanart>
       </assets>
-      <news>[B]Private Fen Light build 2.2.05.6 by Tinkerer[/B]
+      <news>[B]Private Fen Light build 2.2.05.12 by Tinkerer[/B]
+- Scope the selected source language to each CocoScrapers provider thread so delayed and background results remain filtered without shared window state.
+- Run the legacy Fanart view migration once so later per-content view choices are not reset on every Kodi startup.
+- Limit automatic Trakt rate-limit retries to Retry-After values of 10 seconds or less; longer waits return the rate-limit response without freezing Kodi.
+- Replaced the broken page-switching view chooser with a selection dialog that stays inside Fen Light settings.
+- The view list is populated from the active skin's declared video views, with skin-localized names and view IDs.
+- Selecting a view applies it as Fen Light's default for movies, TV shows, seasons, and episodes.
+- Added an add-on startup migration for saved legacy Media Info 3 defaults so Kodi repository updates also default to Fanart.
+- The migration preserves a non-default global view and per-content values that differ from their recorded legacy defaults.
+- Fixed Trakt rate-limit retry handling: safely parse Retry-After and keep request headers intact when retrying.
+- Invalid or missing Retry-After values no longer crash Trakt requests.
 - Added Preferred Source Language in External Scrapers settings. English is the default, with Any Language and supported non-English choices.
 - Added Default Video View presets for Fanart and Media Info 3. Fanart remains the default, while manual IDs and Tools - Set Views remain available.
 - External scraper cache keys now include the selected source language so changing the language refreshes filtered results.
@@ -53,7 +63,7 @@
 - Hardened background workers, playback abort handling, dialogs, and Kodi shutdown.
 - Disabled the retired upstream updater; use KodiPortable Install.bat for updates.
 - Kept Kodi's reusable language invoker enabled for playback stability.
-- Paired CocoScrapers 1.0.32.3 with selectable source-language filtering and updated providers.
+- Paired CocoScrapers 1.0.32.4 with thread-scoped source-language filtering and updated providers.
 - Restored Bitsearch, EZTV, TorrentQuest, Rutor, and ShowRSS as enabled providers.
 - Premiumize selection, resolution, and API behavior were not changed.
 
@@ -61,7 +71,7 @@ See Changelog in Tools for the complete private-build details.
         </news>
     </extension>
   </addon>
-  <addon id="script.module.cocoscrapers" name="CocoScrapers Module" version="1.0.32.3" provider-name="Private Kodi build">
+  <addon id="script.module.cocoscrapers" name="CocoScrapers Module" version="1.0.32.4" provider-name="Private Kodi build">
     <requires>
       <import addon="xbmc.python" version="3.0.0" />
       <import addon="script.module.requests" />
@@ -86,9 +96,10 @@ See Changelog in Tools for the complete private-build details.
         <fanart>fanart.png</fanart>
         <screenshot />
       </assets>
-      <news>[B]Private CocoScrapers build 1.0.32.3 by Tinkerer[/B]
+      <news>[B]Private CocoScrapers build 1.0.32.4 by Tinkerer[/B]
 - Added selectable Fen Light source-language filtering for explicit release-name language tags.
 - English remains the default; Any Language and supported non-English choices are available from Fen Light.
+- Use per-thread language context for Fen searches so background provider results keep the selected language without a shared-window-property race.
 </news>
     </extension>
   </addon>

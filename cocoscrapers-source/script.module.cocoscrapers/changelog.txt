@@ -1,3 +1,9 @@
+[COLOR purple][B]Private build 1.0.32.4[/B][/COLOR]
+- Read Fen Light's selected source language from a per-thread context. Late
+  background results remain filtered correctly without relying on a shared
+  Kodi window property for current Fen builds.
+- Retain the legacy window-property fallback for earlier Fen versions.
+
 [COLOR purple][B]Private build 1.0.32.3[/B][/COLOR]
 - Added language-aware release-name filtering driven by Fen Light's preferred
   external-scraper source language setting. English is the default, with Any

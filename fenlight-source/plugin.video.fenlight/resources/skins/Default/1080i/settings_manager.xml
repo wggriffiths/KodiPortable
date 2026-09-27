@@ -946,7 +946,7 @@
                           <property name="setting_label">    - Default Video View</property>
                           <property name="setting_type">action</property>
                           <property name="setting_value">$INFO[Window(10000).Property(fenlight.view.default_name)]</property>
-                          <property name="setting_description">Choose a preset for movie, TV show, season, and episode views. The presets use Confluence view IDs; use Tools - Set Views or the manual IDs for other skins</property>
+                          <property name="setting_description">Choose from the video views provided by the active skin. The selected view becomes Fen Light's default for movies, TV shows, seasons, and episodes.</property>
                           <onclick>RunPlugin(plugin://plugin.video.fenlight/?mode=settings_manager.set_default_video_view)</onclick>
                       </item>
                       <item>

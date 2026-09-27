@@ -2,6 +2,8 @@
 import json
 import time
 import requests
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from urllib.parse import unquote, quote_plus
 from caches import trakt_cache
 from caches.settings_cache import get_setting, set_setting
@@ -13,6 +15,8 @@ from modules.utils import sort_list, sort_for_article, get_datetime, timedelta, 
 							TaskPool, jsondate_to_datetime as js2date
 # logger = kodi_utils.logger
 
+MAX_AUTOMATIC_RETRY_AFTER_MS = 10000
+
 def no_client_key():
 	kodi_utils.notification('Please set a valid Trakt Client ID Key')
 	return None
@@ -20,6 +24,19 @@ def no_client_key():
 def no_secret_key():
 	kodi_utils.notification('Please set a valid Trakt Client Secret Key')
 	return None
+
+def _retry_after_milliseconds(headers):
+	value = headers.get('Retry-After')
+	if value is None: return None
+	try: seconds = float(value)
+	except (TypeError, ValueError):
+		try:
+			retry_at = parsedate_to_datetime(value)
+			if retry_at.tzinfo is None: retry_at = retry_at.replace(tzinfo=timezone.utc)
+			seconds = (retry_at - datetime.now(timezone.utc)).total_seconds()
+		except (TypeError, ValueError, OverflowError): return None
+	try: return max(0, int(seconds * 1000))
+	except (OverflowError, ValueError): return None
 
 def get_trakt(params):
 	result = call_trakt(params['path'] % params.get('path_insert', ''), params=params.get('params', {}), data=params.get('data'), is_delete=params.get('is_delete', False),
@@ -37,44 +54,49 @@ def call_trakt(path, params={}, data=None, is_delete=False, with_auth=True, meth
 			except: expires_at = 0.0
 			if time.time() > expires_at: trakt_refresh_token()
 			token = get_setting('fenlight.trakt.token')
-			if token: headers['Authorization'] = 'Bearer ' + token
+			if token: request_headers['Authorization'] = 'Bearer ' + token
 		try:
 			if method:
-				if method == 'post': resp = requests.post(API_ENDPOINT % path, headers=headers, timeout=10)
-				elif method == 'delete': resp = requests.delete(API_ENDPOINT % path, headers=headers, timeout=10)
-				else: resp = requests.get(API_ENDPOINT % path, params=params, headers=headers, timeout=10)
+				if method == 'post': resp = requests.post(API_ENDPOINT % path, headers=request_headers, timeout=10)
+				elif method == 'delete': resp = requests.delete(API_ENDPOINT % path, headers=request_headers, timeout=10)
+				else: resp = requests.get(API_ENDPOINT % path, params=params, headers=request_headers, timeout=10)
 			elif data is not None:
 				assert not params
-				resp = requests.post(API_ENDPOINT % path, json=data, headers=headers, timeout=10)
-			elif is_delete: resp = requests.delete(API_ENDPOINT % path, headers=headers, timeout=10)
-			else: resp = requests.get(API_ENDPOINT % path, params=params, headers=headers, timeout=10)
+				resp = requests.post(API_ENDPOINT % path, json=data, headers=request_headers, timeout=10)
+			elif is_delete: resp = requests.delete(API_ENDPOINT % path, headers=request_headers, timeout=10)
+			else: resp = requests.get(API_ENDPOINT % path, params=params, headers=request_headers, timeout=10)
 			resp.raise_for_status()
 		except Exception as e: kodi_utils.logger('Trakt Error', str(e))
 		return resp
 	API_ENDPOINT = 'https://api.trakt.tv/%s'
 	CLIENT_ID = settings.trakt_client()
 	if CLIENT_ID in (None, 'empty_setting', ''): return no_client_key()
-	headers = {'Content-Type': 'application/json', 'trakt-api-version': '2', 'trakt-api-key': CLIENT_ID}
+	request_headers = {'Content-Type': 'application/json', 'trakt-api-version': '2', 'trakt-api-key': CLIENT_ID}
 	if pagination: params['page'] = page_no
 	response = send_query()
 	try: status_code = response.status_code
 	except: return None
-	headers = response.headers
+	response_headers = response.headers
 	if status_code == 401:
 		if with_auth:
 			if settings.trakt_user_active(): trakt_refresh_token()
 			else: return None
 		else: return None
 	elif status_code == 429:
-		if 'Retry-After' in headers:
-			kodi_utils.sleep(1000 * headers['Retry-After'])
+		retry_after_ms = _retry_after_milliseconds(response_headers)
+		if retry_after_ms is not None and retry_after_ms <= MAX_AUTOMATIC_RETRY_AFTER_MS:
+			kodi_utils.sleep(retry_after_ms)
 			response = send_query()
+			try: response_headers = response.headers
+			except: return None
+		elif retry_after_ms is not None:
+			kodi_utils.logger('Trakt Rate Limit', 'Retry-After exceeds 10 seconds; returning the rate-limit response without blocking Kodi')
 	response.encoding = 'utf-8'
-	result = response.json() if 'json' in headers.get('Content-Type', '') else response.text
+	result = response.json() if 'json' in response_headers.get('Content-Type', '') else response.text
 	if method == 'sort_by_headers':
-		sort_by, sort_how = headers.get('X-Sort-By', 'title'), headers.get('X-Sort-How', 'asc')
+		sort_by, sort_how = response_headers.get('X-Sort-By', 'title'), response_headers.get('X-Sort-How', 'asc')
 		result = {'sort_by': sort_by, 'sort_how': sort_how, 'data': result}
-	if pagination: return (result, headers.get('X-Pagination-Page-Count', page_no))
+	if pagination: return (result, response_headers.get('X-Pagination-Page-Count', page_no))
 	else: return result
 
 def trakt_get_device_code():

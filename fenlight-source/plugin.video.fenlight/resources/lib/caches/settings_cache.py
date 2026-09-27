@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
+import os
+import re
+import xml.etree.ElementTree as ET
 from modules import kodi_utils
 from caches.base_cache import connect_database
 # logger = kodi_utils.logger
@@ -33,7 +36,7 @@ class SettingsCache:
 		except: all_settings = {}
 		return all_settings
 
-	def set(self, setting_id, setting_value=None):
+	def set(self, setting_id, setting_value=None, setting_name=None):
 		dbcon = connect_database('settings_db')
 		setting_info = default_setting_values(setting_id)
 		setting_type, setting_default = setting_info['setting_type'], setting_info['setting_default']
@@ -42,7 +45,7 @@ class SettingsCache:
 		self.set_memory_cache(setting_id, setting_value)
 		if setting_type == 'action' and 'settings_options' in setting_info:
 			name_setting_id = '%s_name' % setting_id
-			name_setting_value = setting_info['settings_options'][setting_value]
+			name_setting_value = setting_name if setting_name is not None else setting_info['settings_options'][setting_value]
 			dbcon.execute('INSERT OR REPLACE INTO settings VALUES (?, ?, ?, ?)', (name_setting_id, 'name', '', name_setting_value))
 			self.set_memory_cache(name_setting_id, name_setting_value)
 
@@ -70,8 +73,8 @@ class SettingsCache:
 
 settings_cache = SettingsCache()
 
-def set_setting(setting_id, value):
-	settings_cache.set(setting_id, value)
+def set_setting(setting_id, value, setting_name=None):
+	settings_cache.set(setting_id, value, setting_name)
 
 def get_setting(setting_id, fallback=''):
 	return kodi_utils.get_property(setting_id) or settings_cache.get(setting_id) or fallback
@@ -166,15 +169,110 @@ def set_from_list(params):
 	set_setting(setting_id, setting_value)
 
 def set_default_video_view(params={}):
-	setting_id = 'view.default'
-	settings_options = default_setting_values(setting_id)['settings_options'].items()
-	settings_list = [(v, k) for k, v in settings_options]
-	new_value = kodi_utils.select_dialog(settings_list, **{'items': json.dumps([{'line1': item[0]} for item in settings_list]), 'heading': 'Choose Default Video View', 'narrow_window': 'true'})
-	if not new_value: return
-	setting_value = new_value[1]
-	set_setting(setting_id, setting_value)
+	view_options = _get_skin_video_views()
+	if not view_options:
+		return kodi_utils.ok_dialog(heading='Default Video View', text='Fen Light could not read the video views exposed by the active skin. Use Tools > Set Views or enter the view IDs manually.')
+	current_view = str(get_setting('view.default', '508'))
+	function_list = [(name, view_id) for view_id, name in view_options]
+	items = [{'line1': name, 'line2': 'View ID: %s' % view_id} for view_id, name in view_options]
+	set_focus = next((index for index, (name, view_id) in enumerate(function_list) if view_id == current_view), 0)
+	selected = kodi_utils.select_dialog(function_list, **{'items': json.dumps(items), 'heading': 'Choose Default Video View', 'narrow_window': 'true', 'set_focus': set_focus})
+	if not selected: return
+	view_name, view_id = selected
+	save_default_video_view_choice(view_id, view_name)
+	kodi_utils.notification('Fen Light default view set to %s' % view_name, time=3000)
+
+def _get_skin_video_views():
+	skin_path = kodi_utils.translate_path('special://skin/')
+	skin_id = kodi_utils.current_skin()
+	if not skin_path or not os.path.isdir(skin_path): return []
+	resolution_paths = []
+	addon_xml = os.path.join(skin_path, 'addon.xml')
+	try:
+		addon_root = ET.parse(addon_xml).getroot()
+		resolutions = []
+		for extension in addon_root.findall('extension'):
+			if extension.get('point') == 'xbmc.gui.skin':
+				resolutions = extension.findall('res')
+				break
+		screen = kodi_utils.get_infolabel('System.ScreenResolution')
+		screen_match = re.search(r'(\d+)\s*x\s*(\d+)', screen)
+		screen_size = tuple(screen_match.groups()) if screen_match else None
+		resolutions.sort(key=lambda item: (0 if screen_size and (item.get('width'), item.get('height')) == screen_size else 1 if item.get('default') == 'true' else 2))
+		for resolution in resolutions:
+			folder = resolution.get('folder')
+			if folder:
+				path = os.path.join(skin_path, folder)
+				if os.path.isdir(path): resolution_paths.append(path)
+	except Exception:
+		pass
+	if not resolution_paths:
+		for root, dirs, files in os.walk(skin_path):
+			dirs.sort()
+			if 'MyVideoNav.xml' in files: resolution_paths.append(root)
+	for resolution_path in resolution_paths:
+		nav_path = os.path.join(resolution_path, 'MyVideoNav.xml')
+		try:
+			views = ET.parse(nav_path).getroot().findtext('views')
+			view_ids = [item.strip() for item in views.split(',') if item.strip()]
+		except Exception:
+			continue
+		if not view_ids: continue
+		view_names = _get_skin_view_names(resolution_path, view_ids, skin_id)
+		return [(view_id, view_names.get(view_id, 'View %s' % view_id)) for view_id in view_ids]
+	return []
+
+def _get_skin_view_names(resolution_path, view_ids, skin_id):
+	view_names = {}
+	xml_files = []
+	for root, dirs, files in os.walk(resolution_path):
+		dirs.sort()
+		for filename in files:
+			if filename.lower().endswith('.xml'):
+				xml_files.append(os.path.join(root, filename))
+	xml_files.sort(key=lambda path: (os.path.basename(path).lower() != 'viewsvideolibrary.xml', path.lower()))
+	for xml_path in xml_files:
+		try:
+			root = ET.parse(xml_path).getroot()
+		except Exception:
+			continue
+		for control in root.iter('control'):
+			view_id = control.get('id')
+			if view_id not in view_ids or view_id in view_names: continue
+			viewtype = control.find('viewtype')
+			if viewtype is None: continue
+			label = (viewtype.get('label') or '').strip()
+			if label:
+				label = _localize_skin_view_label(label, skin_id)
+			if not label:
+				label = (viewtype.text or '').strip().replace('_', ' ').title()
+			if label: view_names[view_id] = label
+	return view_names
+
+def _localize_skin_view_label(label, skin_id):
+	def localize(match):
+		return _get_localized_view_string(match.group(1), skin_id) or match.group(0)
+	if label.isdigit(): return _get_localized_view_string(label, skin_id)
+	return re.sub(r'\$LOCALIZE\[(\d+)\]', localize, label).strip()
+
+def _get_localized_view_string(string_id, skin_id):
+	try:
+		localized = kodi_utils.addon(skin_id).getLocalizedString(int(string_id))
+		if localized: return localized.strip()
+	except Exception:
+		pass
+	try:
+		import xbmc
+		return xbmc.getLocalizedString(int(string_id)).strip()
+	except Exception:
+		return ''
+
+def save_default_video_view_choice(view_id, view_name):
+	view_id = str(view_id)
+	view_name = (view_name or '').strip() or 'View %s' % view_id
+	set_setting('view.default', view_id, view_name)
 	for view_setting in ('view.movies', 'view.tvshows', 'view.seasons', 'view.episodes', 'view.episodes_single'):
-		set_setting(view_setting, setting_value)
+		set_setting(view_setting, view_id)
 
 def set_source_folder_path(params):
 	setting_id = params['setting_id']
@@ -274,7 +372,7 @@ def default_settings():
 {'setting_id': 'meta_filter', 'setting_type': 'boolean', 'setting_default': 'false'},
 {'setting_id': 'use_viewtypes', 'setting_type': 'boolean', 'setting_default': 'true'},
 {'setting_id': 'manual_viewtypes', 'setting_type': 'boolean', 'setting_default': 'false'},
-{'setting_id': 'view.default', 'setting_type': 'action', 'setting_default': '508', 'settings_options': {'508': 'Fanart (Confluence)', '515': 'Media Info 3 (Confluence)'}},
+{'setting_id': 'view.default', 'setting_type': 'action', 'setting_default': '508', 'settings_options': {'508': 'Fanart', '515': 'Media Info 3'}},
 {'setting_id': 'view.main', 'setting_type': 'string', 'setting_default': '55'},
 {'setting_id': 'view.movies', 'setting_type': 'string', 'setting_default': '508'},
 {'setting_id': 'view.tvshows', 'setting_type': 'string', 'setting_default': '508'},
@@ -557,6 +655,7 @@ def default_settings():
 {'setting_id': 'trakt.expires', 'setting_type': 'string', 'setting_default': '0'},
 {'setting_id': 'trakt.refresh', 'setting_type': 'string', 'setting_default': '0'},
 {'setting_id': 'trakt.token', 'setting_type': 'string', 'setting_default': '0'},
+{'setting_id': 'private.view_fanart_migration_done', 'setting_type': 'boolean', 'setting_default': 'false'},
 {'setting_id': 'tmdblist.list_sort', 'setting_type': 'string', 'setting_default': '0'},
 {'setting_id': 'tmdblist.list_sort_name', 'setting_type': 'string', 'setting_default': 'Title'},
 {'setting_id': 'personal_list.list_sort', 'setting_type': 'string', 'setting_default': '0'},

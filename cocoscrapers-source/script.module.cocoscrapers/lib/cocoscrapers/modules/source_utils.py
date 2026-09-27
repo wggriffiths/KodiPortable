@@ -4,6 +4,7 @@
 """
 
 import re
+from threading import local
 from string import printable
 from cocoscrapers.modules import cleantitle
 from cocoscrapers.modules.undesirables import Undesirables
@@ -56,6 +57,7 @@ PREFERRED_LANGUAGE_MARKERS = {
 	'tur': ('turkish', '.tr.', '.tur.'),
 	'ukr': ('ukrainian', '.ukr.')
 }
+_preferred_language_context = local()
 
 UNDESIRABLES = ['400p.octopus', '720p.octopus', '1080p.octopus', 'alexfilm', 'amedia', 'audiobook', 'baibako', 'bigsinema', 'bonus.disc', 'casstudio.tv', 'courage.bambey',
 				'.cbr', '.cbz', 'coldfilm', 'dilnix', 'dutchreleaseteam', 'e.book.collection', 'empire.minutemen', 'eniahd', '.exe', 'exkinoray', 'extras.only',
@@ -122,11 +124,23 @@ def check_foreign_audio():
 	return False if home_getProperty('fs_filterless_search') == 'true' else getSetting('filter.foreign.single.audio') == 'true'
 
 def preferred_language():
-	if home_getProperty(PREFERRED_LANGUAGE_ACTIVE_PROPERTY) != 'true' or home_getProperty('fs_filterless_search') == 'true': return ''
+	if home_getProperty('fs_filterless_search') == 'true': return ''
+	try:
+		language = _preferred_language_context.value
+		return language if language == 'any' or language in PREFERRED_LANGUAGE_MARKERS else ''
+	except AttributeError: pass
+	if home_getProperty(PREFERRED_LANGUAGE_ACTIVE_PROPERTY) != 'true': return ''
 	try: language = home_getProperty(PREFERRED_LANGUAGE_PROPERTY).lower().strip()
 	except: language = ''
 	if language == 'any' or language in PREFERRED_LANGUAGE_MARKERS: return language
 	return ''
+
+def set_preferred_language(language):
+	_preferred_language_context.value = str(language or '').lower().strip()
+
+def clear_preferred_language():
+	try: del _preferred_language_context.value
+	except AttributeError: pass
 
 def get_qual(term):
 	if any(i in term for i in SCR): return 'SCR'

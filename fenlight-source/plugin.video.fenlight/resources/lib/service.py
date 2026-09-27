@@ -62,7 +62,39 @@ class PrivateForkPolicy:
 			set_setting('external_scraper.module', 'script.module.cocoscrapers')
 			set_setting('external_scraper.name', 'CocoScrapers Module')
 			kodi_utils.logger('Fen Light', 'Defaulted External Scrapers to CocoScrapers')
+		try: self._migrate_legacy_view_defaults()
+		except Exception as e: kodi_utils.logger('Fen Light', 'Legacy view migration failed: %s' % str(e))
 		return kodi_utils.logger('Fen Light', 'PrivateForkPolicy Service Finished')
+
+	def _migrate_legacy_view_defaults(self):
+		# Kodi repository updates do not run KodiPortable's installer helper.
+		# Run this compatibility migration once; otherwise old default metadata
+		# can make later user-selected per-content views look stale on every boot.
+		migration_setting = 'private.view_fanart_migration_done'
+		if get_setting('fenlight.%s' % migration_setting, 'false') == 'true': return
+		if get_setting('view.default', '508') != '508':
+			set_setting(migration_setting, 'true')
+			return
+		from caches.base_cache import connect_database
+		view_setting_ids = ('view.movies', 'view.tvshows', 'view.seasons', 'view.episodes', 'view.episodes_single')
+		legacy_view_ids = ('500', '55', '515', '720896')
+		placeholders = ', '.join('?' for _ in view_setting_ids)
+		dbcon = connect_database('settings_db')
+		try:
+			rows = dbcon.execute(
+				'SELECT setting_id, setting_default, setting_value FROM settings WHERE setting_id IN (%s)' % placeholders,
+				view_setting_ids
+			).fetchall()
+		finally: dbcon.close()
+		migrated = []
+		for setting_id, setting_default, setting_value in rows:
+			setting_default, setting_value = str(setting_default), str(setting_value)
+			if setting_default in legacy_view_ids and setting_value == setting_default:
+				set_setting(setting_id, '508')
+				migrated.append(setting_id)
+		set_setting(migration_setting, 'true')
+		if migrated:
+			kodi_utils.logger('Fen Light', 'Migrated legacy default views to Fanart: %s' % ', '.join(migrated))
 
 class OnUpdateChanges:
 	def run(self):
