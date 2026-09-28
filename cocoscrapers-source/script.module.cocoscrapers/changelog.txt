@@ -1,3 +1,8 @@
+[COLOR purple][B]Private build 1.0.32.5[/B][/COLOR]
+- Propagate Fen Light's per-thread preferred-language context into CocoScrapers
+  worker threads. Nested provider workers now apply the selected language
+  without relying on shared Kodi window properties.
+
 [COLOR purple][B]Private build 1.0.32.4[/B][/COLOR]
 - Read Fen Light's selected source language from a per-thread context. Late
   background results remain filtered correctly without relying on a shared

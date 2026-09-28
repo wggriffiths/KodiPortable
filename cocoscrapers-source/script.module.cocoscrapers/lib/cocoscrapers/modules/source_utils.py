@@ -138,6 +138,10 @@ def preferred_language():
 def set_preferred_language(language):
 	_preferred_language_context.value = str(language or '').lower().strip()
 
+def get_preferred_language_context():
+	try: return _preferred_language_context.value
+	except AttributeError: return ''
+
 def clear_preferred_language():
 	try: del _preferred_language_context.value
 	except AttributeError: pass
