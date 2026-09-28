@@ -71,7 +71,7 @@ See Changelog in Tools for the complete private-build details.
         </news>
     </extension>
   </addon>
-  <addon id="script.module.cocoscrapers" name="CocoScrapers Module" version="1.0.32.4" provider-name="Private Kodi build">
+  <addon id="script.module.cocoscrapers" name="CocoScrapers Module" version="1.0.32.5" provider-name="Private Kodi build">
     <requires>
       <import addon="xbmc.python" version="3.0.0" />
       <import addon="script.module.requests" />
@@ -96,10 +96,10 @@ See Changelog in Tools for the complete private-build details.
         <fanart>fanart.png</fanart>
         <screenshot />
       </assets>
-      <news>[B]Private CocoScrapers build 1.0.32.4 by Tinkerer[/B]
+      <news>[B]Private CocoScrapers build 1.0.32.5 by Tinkerer[/B]
 - Added selectable Fen Light source-language filtering for explicit release-name language tags.
 - English remains the default; Any Language and supported non-English choices are available from Fen Light.
-- Use per-thread language context for Fen searches so background provider results keep the selected language without a shared-window-property race.
+- Propagate Fen's per-thread language context into nested CocoScrapers workers, so provider results keep the selected language without shared Kodi window properties.
 </news>
     </extension>
   </addon>
